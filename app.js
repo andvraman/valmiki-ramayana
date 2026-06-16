@@ -28,20 +28,6 @@ const LS = {
 // Translation cache in memory (also persisted to localStorage)
 const trCache = {};
 
-// ── DEVANAGARI NUMERALS ──
-const DEV_DIGITS = ['०','१','२','३','४','५','६','७','८','९'];
-function toDevanagari(n) {
-  return String(n).split('').map(d => DEV_DIGITS[parseInt(d)] ?? d).join('');
-}
-// Returns sarga label depending on current language
-function sargaNum(n) {
-  return lang === 'hi' ? `सर्ग ${toDevanagari(n)}` : `Sarga ${n}`;
-}
-// Returns kanda label depending on current language
-function kandaNum(n) {
-  return lang === 'hi' ? `काण्ड ${toDevanagari(n)}` : `Kanda ${n}`;
-}
-
 // ── BOOT ──
 async function boot() {
   // Load preferences
@@ -134,7 +120,7 @@ function renderHome() {
     if (k && sa && sh) {
       btn.classList.add('visible');
       document.getElementById('continue-loc').textContent =
-        `${k.name_sa} · सर्ग ${toDevanagari(bmSarga + 1)} · श्लोक ${sh.nd}`;
+        `${k.name_sa} · सर्ग ${bmSarga + 1} · श्लोक ${sh.nd}`;
     }
   } else {
     btn.classList.remove('visible');
@@ -148,7 +134,7 @@ function renderHome() {
     card.className = 'kanda-card';
     card.innerHTML = `
       <div class="kanda-card-left">
-        <div class="kanda-num">${kandaNum(i + 1)}</div>
+        <div class="kanda-num">काण्ड ${i + 1}</div>
         <div class="kanda-name-sa">${k.name_sa}</div>
         <div class="kanda-name-en">${k.name_roman} · ${k.name_en}</div>
       </div>
@@ -198,9 +184,9 @@ function openKanda(ki) {
     row.className = 'sarga-row' + (isBm ? ' bookmarked' : '');
     row.innerHTML = `
       <div class="sarga-left">
-        <div class="sarga-num">${sargaNum(si + 1)}</div>
+        <div class="sarga-num">Sarga ${si + 1}</div>
         <div class="sarga-name-sa">${sa.title_sa || ''}</div>
-        <div class="sarga-name-en">${sa.title_en || ''} · ${lang === 'hi' ? toDevanagari(sa.shlokas.length) : sa.shlokas.length} shlokas</div>
+        <div class="sarga-name-en">${sa.title_en || ''} · ${sa.shlokas.length} shlokas</div>
       </div>
       <div class="sarga-right">
         ${isBm ? '<span class="sarga-bm">🔖</span>' : ''}
@@ -251,10 +237,9 @@ function paintShloka(dir) {
     // Watermark & labels
     document.getElementById('watermark').textContent = sh.nd;
     document.getElementById('sarga-sublabel').textContent =
-      `${k.name_sa} · सर्ग ${toDevanagari(curSarga + 1)} · श्लोक ${sh.nd}`;
-    document.getElementById('reader-counter').textContent = lang === 'hi'
-      ? `${sh.nd} / ${toDevanagari(sa.shlokas.length)}`
-      : `${sh.n} / ${sa.shlokas.length}`;
+      `${k.name_sa} · सर्ग ${curSarga + 1} · श्लोक ${sh.nd}`;
+    document.getElementById('reader-counter').textContent =
+      `${sh.n} / ${sa.shlokas.length}`;
 
     // Sanskrit
     document.getElementById('sanskrit-text').innerHTML = sh.sa.replace(/\n/g, '<br>');
@@ -304,12 +289,85 @@ function paintShloka(dir) {
 }
 
 // ── TRANSLATION FETCH ──
-// Translations are served from bundled data in ramayana.json.
-// Each shloka has 'hi' (Hindi) and 'en' (English) fields.
 async function fetchTranslation(shlokaNum) {
-  const sh   = DB.kandas[curKanda].sargas[curSarga].shlokas[curShloka];
-  const text = lang === 'hi' ? (sh.hi || null) : (sh.en || null);
-  setTranslationText(text);
+  const cacheKey = LS.cache(curKanda + 1, curSarga + 1, shlokaNum);
+
+  // Check localStorage cache first
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) {
+    setTranslationText(cached);
+    return;
+  }
+
+  // Check memory cache
+  if (trCache[cacheKey]) {
+    setTranslationText(trCache[cacheKey]);
+    return;
+  }
+
+  // Check if offline
+  if (!navigator.onLine) {
+    setTranslationText(null);
+    return;
+  }
+
+  // Build ramayana.info URL
+  // URL format: /story/{kanda-slug}/{sarga-num}/#shloka-{n}
+  const kandaSlugs = ['bala','ayodhya','aranya','kishkindha','sundara','yuddha','uttara'];
+  const slug = kandaSlugs[curKanda];
+  const url  = `https://ramayana.info/story/${slug}/${curSarga + 1}/`;
+
+  try {
+    const res  = await fetch(url);
+    const html = await res.text();
+    const text = extractTranslation(html, shlokaNum, lang);
+
+    if (text) {
+      trCache[cacheKey] = text;
+      try { localStorage.setItem(cacheKey, text); } catch(e) {}
+      setTranslationText(text);
+    } else {
+      setTranslationText(null);
+    }
+  } catch(e) {
+    setTranslationText(null);
+  }
+}
+
+function extractTranslation(html, shlokaNum, language) {
+  // Parse the ramayana.info page HTML to find the translation for this shloka
+  // ramayana.info uses data attributes and structured divs per shloka
+  const parser = new DOMParser();
+  const doc    = parser.parseFromString(html, 'text/html');
+
+  // Try to find shloka by id or data attribute patterns used on ramayana.info
+  const shlokaId = `shloka-${shlokaNum}`;
+  let el = doc.getElementById(shlokaId);
+
+  if (!el) {
+    // Try data-shloka attribute
+    el = doc.querySelector(`[data-shloka="${shlokaNum}"]`);
+  }
+
+  if (!el) {
+    // Try finding by sequential position
+    const allShlokas = doc.querySelectorAll('.shloka, [class*="shloka"]');
+    if (allShlokas[shlokaNum - 1]) el = allShlokas[shlokaNum - 1];
+  }
+
+  if (!el) return null;
+
+  // Find translation within the element
+  const langAttr  = language === 'hi' ? 'hi' : 'en';
+  let transEl = el.querySelector(`[lang="${langAttr}"], .translation-${langAttr}, .meaning-${langAttr}`);
+
+  if (!transEl) {
+    // Fallback: look for the first paragraph-like element after the Sanskrit
+    const ps = el.querySelectorAll('p');
+    if (ps.length > 1) transEl = ps[1];
+  }
+
+  return transEl ? transEl.textContent.trim() : null;
 }
 
 function setTranslationText(text) {
@@ -375,7 +433,7 @@ function toggleBookmark() {
     localStorage.setItem(LS.bmS,  bmSarga);
     localStorage.setItem(LS.bmSh, bmShloka);
     const sh = DB.kandas[curKanda].sargas[curSarga].shlokas[curShloka];
-    showToast(`Saved · ${DB.kandas[curKanda].name_sa} · सर्ग ${toDevanagari(curSarga+1)} · ${sh.nd}`);
+    showToast(`Saved · ${DB.kandas[curKanda].name_sa} · सर्ग ${curSarga+1} · ${sh.nd}`);
     renderHome();
   }
   updateBmBtn();
