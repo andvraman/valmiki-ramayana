@@ -304,85 +304,12 @@ function paintShloka(dir) {
 }
 
 // ── TRANSLATION FETCH ──
+// Translations are served from bundled data in ramayana.json.
+// Each shloka has 'hi' (Hindi) and 'en' (English) fields.
 async function fetchTranslation(shlokaNum) {
-  const cacheKey = LS.cache(curKanda + 1, curSarga + 1, shlokaNum);
-
-  // Check localStorage cache first
-  const cached = localStorage.getItem(cacheKey);
-  if (cached) {
-    setTranslationText(cached);
-    return;
-  }
-
-  // Check memory cache
-  if (trCache[cacheKey]) {
-    setTranslationText(trCache[cacheKey]);
-    return;
-  }
-
-  // Check if offline
-  if (!navigator.onLine) {
-    setTranslationText(null);
-    return;
-  }
-
-  // Build ramayana.info URL
-  // URL format: /story/{kanda-slug}/{sarga-num}/#shloka-{n}
-  const kandaSlugs = ['bala','ayodhya','aranya','kishkindha','sundara','yuddha','uttara'];
-  const slug = kandaSlugs[curKanda];
-  const url  = `https://ramayana.info/story/${slug}/${curSarga + 1}/`;
-
-  try {
-    const res  = await fetch(url);
-    const html = await res.text();
-    const text = extractTranslation(html, shlokaNum, lang);
-
-    if (text) {
-      trCache[cacheKey] = text;
-      try { localStorage.setItem(cacheKey, text); } catch(e) {}
-      setTranslationText(text);
-    } else {
-      setTranslationText(null);
-    }
-  } catch(e) {
-    setTranslationText(null);
-  }
-}
-
-function extractTranslation(html, shlokaNum, language) {
-  // Parse the ramayana.info page HTML to find the translation for this shloka
-  // ramayana.info uses data attributes and structured divs per shloka
-  const parser = new DOMParser();
-  const doc    = parser.parseFromString(html, 'text/html');
-
-  // Try to find shloka by id or data attribute patterns used on ramayana.info
-  const shlokaId = `shloka-${shlokaNum}`;
-  let el = doc.getElementById(shlokaId);
-
-  if (!el) {
-    // Try data-shloka attribute
-    el = doc.querySelector(`[data-shloka="${shlokaNum}"]`);
-  }
-
-  if (!el) {
-    // Try finding by sequential position
-    const allShlokas = doc.querySelectorAll('.shloka, [class*="shloka"]');
-    if (allShlokas[shlokaNum - 1]) el = allShlokas[shlokaNum - 1];
-  }
-
-  if (!el) return null;
-
-  // Find translation within the element
-  const langAttr  = language === 'hi' ? 'hi' : 'en';
-  let transEl = el.querySelector(`[lang="${langAttr}"], .translation-${langAttr}, .meaning-${langAttr}`);
-
-  if (!transEl) {
-    // Fallback: look for the first paragraph-like element after the Sanskrit
-    const ps = el.querySelectorAll('p');
-    if (ps.length > 1) transEl = ps[1];
-  }
-
-  return transEl ? transEl.textContent.trim() : null;
+  const sh   = DB.kandas[curKanda].sargas[curSarga].shlokas[curShloka];
+  const text = lang === 'hi' ? (sh.hi || null) : (sh.en || null);
+  setTranslationText(text);
 }
 
 function setTranslationText(text) {
