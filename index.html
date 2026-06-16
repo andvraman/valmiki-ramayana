@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="sa-IN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Sanskrit:ital@0;1&display=swap" rel="stylesheet">
+<title>वाल्मीकि रामायण</title>
+<style>
+/* ── Tokens ─────────────────────────────────────────── */
+:root {
+  --bg:       #1a1208;
+  --bg-card:  #231a0d;
+  --bg-card2: #2a2010;
+  --gold:     #c8973a;
+  --gold-dim: #5a3f10;
+  --saffron:  #e8720c;
+  --text:     #ede0c8;
+  --text-dim: #9a8060;
+  --panel:    #fffff0;
+  --panel-bd: #c8a050;
+  --panel-tx: #1a0a00;
+  --panel-dm: #5a3000;
+  --deva:     'Tiro Devanagari Sanskrit','Noto Sans Devanagari','Mangal',serif;
+  --roman:    'Georgia','Times New Roman',serif;
+  --ui:       -apple-system,'Segoe UI',sans-serif;
+  --fs:       18px;
+}
+.light {
+  --bg:       #f0ead8;
+  --bg-card:  #faf5e8;
+  --bg-card2: #e8e0cc;
+  --gold:     #7a4f00;
+  --gold-dim: #b08030;
+  --saffron:  #b04800;
+  --text:     #1a0a00;
+  --text-dim: #6a4020;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-size:var(--fs);background:var(--bg);color:var(--text);font-family:var(--ui);transition:background .25s,color .25s;}
+
+/* ── App shell ───────────────────────────────────────── */
+#app{display:flex;flex-direction:column;height:100dvh;max-width:680px;margin:0 auto;}
+
+/* ── Header ──────────────────────────────────────────── */
+header{
+  flex-shrink:0;background:var(--bg-card);
+  border-bottom:1px solid var(--gold-dim);
+  padding:8px 14px;
+  display:flex;align-items:center;gap:10px;
+}
+.h-title{flex:1;min-width:0;}
+.h-title .deva-main{
+  font-family:var(--deva);font-size:1.05rem;font-weight:700;
+  color:var(--gold);display:block;line-height:1.2;white-space:nowrap;
+}
+.h-title .roman-main{
+  font-family:var(--roman);font-size:0.6rem;font-style:italic;
+  color:var(--text-dim);display:block;white-space:nowrap;
+}
+.jai-ram{
+  flex-shrink:0;font-family:var(--deva);font-size:0.78rem;
+  color:var(--saffron);letter-spacing:0.03em;white-space:nowrap;
+}
+.h-controls{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.btn-group{display:flex;border:1px solid var(--gold-dim);border-radius:6px;overflow:hidden;}
+.btn-group button{
+  background:transparent;border:none;color:var(--text-dim);cursor:pointer;
+  font-family:var(--ui);font-size:0.72rem;padding:5px 11px;
+  transition:background .15s,color .15s;
+}
+.btn-group button.active{background:var(--gold);color:#fff;font-weight:700;}
+.btn-group button+button{border-left:1px solid var(--gold-dim);}
+.icon-btn{
+  background:transparent;border:1px solid var(--gold-dim);border-radius:6px;
+  color:var(--text-dim);cursor:pointer;font-size:0.9rem;padding:4px 8px;line-height:1.4;
+}
+
+/* ── Screens ─────────────────────────────────────────── */
+.screen{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;}
+.screen.active{display:flex;flex-direction:column;}
+
+/* ── Kanda screen ────────────────────────────────────── */
+#kanda-screen{padding:20px 16px;}
+.screen-title{
+  font-family:var(--deva);font-size:1rem;color:var(--gold);
+  text-align:center;margin-bottom:18px;letter-spacing:0.04em;
+}
+.kanda-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.kanda-btn{
+  background:var(--bg-card);border:1px solid var(--gold-dim);border-radius:10px;
+  padding:16px 12px;cursor:pointer;text-align:center;
+  transition:border-color .15s,background .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.kanda-btn:active{background:var(--bg-card2);border-color:var(--gold);}
+.kanda-btn .kb-deva{
+  font-family:var(--deva);font-size:1rem;color:var(--gold);
+  display:block;line-height:1.3;
+}
+.kanda-btn .kb-roman{
+  font-family:var(--roman);font-size:0.65rem;font-style:italic;
+  color:var(--text-dim);display:block;margin-top:3px;
+}
+.kanda-btn .kb-count{
+  font-family:var(--ui);font-size:0.6rem;color:var(--saffron);
+  display:block;margin-top:5px;letter-spacing:0.04em;
+}
+.bm-jump{
+  margin-top:22px;background:var(--bg-card2);border:1px solid var(--saffron);
+  border-radius:8px;padding:12px 16px;cursor:pointer;
+  font-family:var(--deva);font-size:0.85rem;color:var(--saffron);
+  text-align:center;-webkit-tap-highlight-color:transparent;
+  display:none;
+}
+
+/* ── Sarga screen ────────────────────────────────────── */
+#sarga-screen{padding:0;}
+.back-bar{
+  flex-shrink:0;background:var(--bg-card2);border-bottom:1px solid var(--gold-dim);
+  padding:9px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.back-bar .back-arr{color:var(--gold);font-size:1rem;}
+.back-bar .back-label{font-family:var(--deva);font-size:0.82rem;color:var(--text-dim);}
+.sarga-kanda-title{
+  flex-shrink:0;padding:14px 16px 8px;
+  font-family:var(--deva);font-size:0.95rem;color:var(--gold);font-weight:700;
+  border-bottom:1px solid var(--gold-dim);
+}
+.sarga-list{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 0;}
+.sarga-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 16px;cursor:pointer;border-bottom:1px solid rgba(90,63,16,0.3);
+  -webkit-tap-highlight-color:transparent;transition:background .12s;
+}
+.sarga-item:active{background:var(--bg-card2);}
+.sarga-item .si-num{
+  font-family:var(--deva);font-size:0.85rem;color:var(--saffron);
+  min-width:36px;flex-shrink:0;
+}
+.sarga-item .si-name{
+  font-family:var(--deva);font-size:0.88rem;color:var(--text);flex:1;
+  line-height:1.35;
+}
+.sarga-item .si-roman{
+  font-family:var(--roman);font-style:italic;font-size:0.62rem;
+  color:var(--text-dim);display:block;
+}
+.sarga-item .si-arr{color:var(--gold-dim);font-size:0.8rem;flex-shrink:0;}
+
+/* ── Verse screen ────────────────────────────────────── */
+#verse-screen{padding:0;}
+.verse-top-bar{
+  flex-shrink:0;background:var(--bg-card2);border-bottom:1px solid var(--gold-dim);
+  padding:7px 14px;display:flex;align-items:center;gap:8px;
+}
+.verse-top-bar .back-arr{color:var(--gold);cursor:pointer;font-size:1rem;padding:2px 6px 2px 0;}
+.vs-sarga-label{
+  flex:1;font-family:var(--deva);font-size:0.78rem;color:var(--gold);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.vs-sarga-roman{
+  font-family:var(--roman);font-style:italic;font-size:0.6rem;
+  color:var(--text-dim);display:block;
+}
+.size-ctrl{display:flex;align-items:center;gap:4px;}
+.size-ctrl span{font-size:0.65rem;color:var(--text-dim);font-family:var(--ui);}
+.size-ctrl input{width:60px;accent-color:var(--gold);cursor:pointer;}
+
+/* verse area */
+#verse-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px 8px;}
+
+/* verse meta row */
+.v-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.v-num{font-family:var(--deva);font-size:0.78rem;color:var(--saffron);}
+.bm-btn{
+  background:var(--bg-card2);border:1px solid var(--gold-dim);border-radius:6px;
+  cursor:pointer;font-size:0.72rem;padding:5px 10px;color:var(--gold);
+  font-family:var(--ui);display:flex;align-items:center;gap:4px;
+  -webkit-tap-highlight-color:transparent;transition:background .15s,border-color .15s;
+}
+.bm-btn.set{background:var(--saffron);border-color:var(--saffron);color:#fff;}
+
+/* panels */
+.panel{
+  background:var(--panel);border:1px solid var(--panel-bd);
+  border-radius:8px;padding:14px 14px 12px;margin-bottom:10px;
+}
+.sec-label{
+  font-family:var(--ui);font-size:0.6rem;font-weight:700;
+  letter-spacing:0.09em;text-transform:uppercase;
+  color:var(--saffron);margin-bottom:6px;display:block;
+}
+.shloka{
+  font-family:var(--deva);font-size:1.12em;line-height:1.9;
+  color:var(--panel-tx);margin-bottom:8px;
+}
+.iast{
+  font-family:var(--roman);font-style:italic;font-size:0.8em;
+  color:var(--panel-dm);line-height:1.75;
+}
+.hindi-prose{
+  font-family:var(--deva);font-size:0.95em;
+  color:var(--panel-tx);line-height:1.95;margin-bottom:10px;
+}
+.eng-prose{
+  font-family:var(--roman);font-size:0.88em;
+  color:var(--panel-tx);line-height:1.8;margin-bottom:10px;
+}
+.panel-hr{border:none;border-top:1px solid var(--panel-bd);margin:10px 0;}
+.word-table{width:100%;border-collapse:collapse;font-size:0.76em;}
+.word-table th{
+  text-align:left;color:var(--saffron);font-family:var(--ui);
+  font-weight:700;font-size:0.64em;letter-spacing:0.07em;
+  text-transform:uppercase;padding:3px 5px 6px;
+  border-bottom:1px solid var(--panel-bd);
+}
+.word-table td{padding:5px 5px;border-bottom:1px solid rgba(180,120,20,0.2);vertical-align:top;}
+.word-table tr:last-child td{border-bottom:none;}
+.wd{font-family:var(--deva);font-size:1.05em;color:var(--panel-tx);font-weight:600;}
+.wi{font-family:var(--roman);font-style:italic;color:var(--panel-dm);font-size:0.88em;}
+.wm{font-family:var(--roman);color:var(--panel-tx);line-height:1.5;}
+
+/* loading / error states */
+.loading-msg{
+  font-family:var(--deva);font-size:0.9rem;color:var(--text-dim);
+  text-align:center;padding:30px 20px;
+}
+.err-msg{
+  font-family:var(--roman);font-size:0.82rem;color:var(--saffron);
+  text-align:center;padding:20px;line-height:1.6;
+}
+
+/* mode visibility */
+.mode-hindi .eng-only{display:none;}
+.mode-eng   .hi-only{display:none;}
+
+/* nav bar */
+#nav-bar{
+  flex-shrink:0;background:var(--bg-card);border-top:1px solid var(--gold-dim);
+  padding:10px 14px;display:flex;align-items:center;gap:10px;
+}
+.nav-btn{
+  flex:1;background:var(--bg-card2);border:1px solid var(--gold-dim);
+  border-radius:8px;color:var(--text);cursor:pointer;font-family:var(--ui);
+  font-size:0.85rem;padding:11px 10px;display:flex;align-items:center;
+  justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent;
+  transition:background .15s;
+}
+.nav-btn:active{background:var(--gold-dim);}
+.nav-btn:disabled{opacity:.25;pointer-events:none;}
+.nav-btn .arr{font-size:1rem;color:var(--gold);}
+.v-counter{text-align:center;min-width:52px;flex-shrink:0;}
+.v-counter .cur{font-family:var(--deva);font-size:1.05rem;color:var(--gold);display:block;line-height:1;}
+.v-counter .tot{font-size:0.6rem;color:var(--text-dim);}
+
+/* toast */
+#toast{
+  display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  background:var(--saffron);color:#fff;padding:8px 18px;border-radius:18px;
+  font-size:0.78rem;font-family:var(--ui);box-shadow:0 4px 16px rgba(0,0,0,.4);
+  z-index:300;pointer-events:none;white-space:nowrap;
+}
+
+@media(max-width:380px){:root{--fs:16px;}}
+</style>
+</head>
+<body class="mode-hindi">
+<div id="app">
+
+<!-- ── HEADER (persists across all screens) ─── -->
+<header>
+  <div class="h-title">
+    <span class="deva-main">वाल्मीकि रामायण</span>
+    <span class="roman-main">Vālmīki Rāmāyaṇa</span>
+  </div>
+  <span class="jai-ram">॥ जय श्री राम ॥</span>
+  <div class="h-controls">
+    <div class="btn-group">
+      <button id="btn-hi" class="active" onclick="setMode('hindi')">हिंदी</button>
+      <button id="btn-en" onclick="setMode('eng')">English</button>
+    </div>
+    <button class="icon-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
+  </div>
+</header>
+
+<!-- ── SCREEN 1 : Kanda selection ─────────── -->
+<div id="kanda-screen" class="screen active">
+  <div class="screen-title">काण्ड चुनें · Select a Kāṇḍa</div>
+  <div class="kanda-grid" id="kanda-grid"></div>
+  <div class="bm-jump" id="bm-jump" onclick="jumpToBookmark()"></div>
+</div>
+
+<!-- ── SCREEN 2 : Sarga selection ────────── -->
+<div id="sarga-screen" class="screen">
+  <div class="back-bar" onclick="showScreen('kanda')">
+    <span class="back-arr">◀</span>
+    <span class="back-label" id="sarga-back-label">काण्ड · Kāṇḍa</span>
+  </div>
+  <div class="sarga-kanda-title" id="sarga-kanda-title"></div>
+  <div class="sarga-list" id="sarga-list"></div>
+</div>
+
+<!-- ── SCREEN 3 : Verse reader ───────────── -->
+<div id="verse-screen" class="screen">
+  <div class="verse-top-bar">
+    <span class="back-arr" onclick="showScreen('sarga')">◀</span>
+    <div class="vs-sarga-label" id="vs-label">
+      <span id="vs-deva"></span>
+      <span class="vs-sarga-roman" id="vs-roman"></span>
+    </div>
+    <div class="size-ctrl">
+      <span>अ</span>
+      <input type="range" id="size-range" min="14" max="26" value="18" oninput="setSize(this.value)">
+      <span style="font-size:1.1em">अ</span>
+    </div>
+  </div>
+  <div id="verse-area"></div>
+  <div id="nav-bar">
+    <button class="nav-btn" id="btn-prev" onclick="go(-1)">
+      <span class="arr">◀</span> पूर्व
+    </button>
+    <div class="v-counter">
+      <span class="cur" id="v-cur">१</span>
+      <span class="tot" id="v-tot">/ —</span>
+    </div>
+    <button class="nav-btn" id="btn-next" onclick="go(1)">
+      अग्र <span class="arr">▶</span>
+    </button>
+  </div>
+</div>
+
+</div><!-- #app -->
+<div id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   KANDA / SARGA METADATA
+   Source: Valmiki Ramayana canonical structure
+═══════════════════════════════════════════════════════ */
+const KANDAS = [
+  {
+    id:1, iitk:1,
+    deva:'बालकाण्ड', roman:'Bāla Kāṇḍa',
+    eng:'Book of Youth',
+    vnetKey:'baala',
+    sargas: buildSargaList(1, [
+      ['नारदसंभाषण','Nārada-saṃbhāṣaṇa'],
+      ['श्रीरामोत्पत्ति','Śrī-rāmotpatti'],
+      ['क्रौञ्चवध','Krauñca-vadha'],
+      ['रामायण-संग्रह','Rāmāyaṇa-saṃgraha'],
+      ['अयोध्यावर्णन','Ayodhyā-varṇana'],
+      ['दशरथवर्णन','Daśaratha-varṇana'],
+      ['मंत्रिवर्णन','Mantri-varṇana'],
+      ['सुमंत्रवाक्य','Sumantra-vākya'],
+      ['ऋश्यशृंग','Ṛśyaśṛṅga'],
+      ['ऋश्यशृंगानयन','Ṛśyaśṛṅgānayanaṃ'],
+      ['यज्ञनिश्चय','Yajña-niścaya'],
+      ['यज्ञारंभ','Yajñāraṃbha'],
+      ['यज्ञसमाप्ति','Yajña-samāpti'],
+      ['रावणवध','Rāvaṇa-vadha'],
+      ['देवप्रार्थना','Deva-prārthanā'],
+      ['वानरोत्पत्ति','Vānara-utpatti'],
+      ['ऋश्यशृंगप्रत्यागमन','Ṛśyaśṛṅga-pratyāgamana'],
+      ['ऋश्यशृंगविदाय','Ṛśyaśṛṅga-vidāya'],
+      ['पुत्रोत्पत्ति','Putra-utpatti'],
+      ['विश्वामित्रागमन','Viśvāmitra-āgamana'],
+      ['विश्वामित्रवाक्य','Viśvāmitra-vākya'],
+      ['राजानुमति','Rājānumati'],
+      ['वसिष्ठवाक्य','Vasiṣṭha-vākya'],
+      ['रामगमन','Rāma-gamana'],
+      ['ताटकावध','Tāṭakā-vadha'],
+      ['अस्त्रप्रदान','Astra-pradāna'],
+      ['सिद्धाश्रम','Siddha-āśrama'],
+      ['यज्ञरक्षण','Yajña-rakṣaṇa'],
+      ['गंगावतरण','Gaṅgā-avatāraṇa'],
+      ['गंगोत्पत्ति','Gaṅga-utpatti'],
+      ['हिमालयवर्णन','Himālaya-varṇana'],
+      ['उमावृत्तान्त','Umā-vṛttānta'],
+      ['कार्तिकेयोत्पत्ति','Kārtikeyotpatti'],
+      ['गंगाप्रवाह','Gaṅgā-pravāha'],
+      ['सगरोपाख्यान','Sagara-upākhyāna'],
+      ['सगरपुत्र','Sagara-putra'],
+      ['अंशुमत्','Aṃśumān'],
+      ['भगीरथ','Bhagīratha'],
+      ['गंगासागर','Gaṅgā-sāgara'],
+      ['विश्वामित्रोपाख्यान','Viśvāmitra-upākhyāna'],
+      ['त्रिशंकु','Triśaṅku'],
+      ['त्रिशंकुयाग','Triśaṅku-yāga'],
+      ['वामदेव','Vāmadeva'],
+      ['शुनःशेप','Śunaḥśepa'],
+      ['विश्वामित्रब्रह्मर्षि','Viśvāmitra-brahmarṣi'],
+      ['जनकपुर','Janaka-pura'],
+      ['धनुर्वर्णन','Dhanuṣ-varṇana'],
+      ['अहल्योद्धार','Ahaly-oddhāra'],
+      ['जनकपुर-प्रवेश','Janakpura-praveśa'],
+      ['सीतास्वयंवर','Sītā-svayaṃvara'],
+      ['राजागमन','Rājā-gamana'],
+      ['दशरथागमन','Daśaratha-āgamana'],
+      ['विवाहसमारंभ','Vivāha-samāraṃbha'],
+      ['विवाह','Vivāha'],
+      ['परशुराम','Paraśurāma'],
+      ['परशुरामनिवृत्ति','Paraśurāma-nivṛtti'],
+      ['अयोध्याप्रवेश','Ayodhyā-praveśa'],
+    ], 77)
+  },
+  {
+    id:2, iitk:2,
+    deva:'अयोध्याकाण्ड', roman:'Ayodhyā Kāṇḍa',
+    eng:'Book of Ayodhyā',
+    vnetKey:'ayodhya',
+    sargas: buildSargaList(2, [
+      ['रामाभिषेकनिश्चय','Rāmābhiṣeka-niścaya'],
+      ['कैकेयीशोक','Kaikeyī-śoka'],
+      ['मंथरावाक्य','Mantharā-vākya'],
+      ['कैकेयीप्रबोधन','Kaikeyī-prabodha'],
+      ['दशरथागमन','Daśaratha-āgamana'],
+      ['कैकेयीवरयाचना','Kaikeyī-vara-yācanā'],
+      ['रामाह्वान','Rāma-āhvāna'],
+      ['रामे दशरथवाक्य','Rāme Daśaratha-vākya'],
+      ['रामे कैकेयीवाक्य','Rāme Kaikeyī-vākya'],
+      ['कौसल्याशोक','Kausalyā-śoka'],
+      ['लक्ष्मणक्रोध','Lakṣmaṇa-krodha'],
+      ['रामलक्ष्मणसंवाद','Rāma-Lakṣmaṇa-saṃvāda'],
+      ['कौसल्यानुमति','Kausalyā-numati'],
+      ['सीतागमन','Sītā-gamana'],
+      ['सीताप्रश्न','Sītā-praśna'],
+      ['लक्ष्मणागमन','Lakṣmaṇa-āgamana'],
+      ['अभिषेकद्रव्यनिवृत्ति','Abhiṣeka-dravya-nivṛtti'],
+      ['दशरथविलाप','Daśaratha-vilāpa'],
+      ['रामवनगमन','Rāma-vana-gamana'],
+      ['सुमंत्रोपालंभ','Sumantra-upālambha'],
+      ['वसिष्ठक्रोध','Vasiṣṭha-krodha'],
+      ['प्रजाशोक','Prajā-śoka'],
+      ['अयोध्याशोक','Ayodhyā-śoka'],
+      ['सीताविदाय','Sītā-vidāya'],
+      ['तमसातट','Tamasā-taṭa'],
+      ['श्रृंगवेरपुर','Śṛṅgavera-pura'],
+      ['गुहसंवाद','Guha-saṃvāda'],
+      ['सुमंत्रप्रतिनिवृत्ति','Sumantra-pratinivṛtti'],
+      ['गंगातरण','Gaṅgā-taraṇa'],
+      ['चित्रकूटमार्ग','Citrakūṭa-mārga'],
+      ['वाल्मीकिआश्रम','Vālmīki-āśrama'],
+      ['चित्रकूट','Citrakūṭa'],
+      ['भरद्वाजाश्रम','Bharadvāja-āśrama'],
+      ['सुमंत्राविदाय','Sumantrā-vidāya'],
+      ['सुमंत्रप्रत्यागमन','Sumantra-pratyāgamana'],
+      ['दशरथशोक','Daśaratha-śoka'],
+      ['श्रवणवध','Śravaṇa-vadha'],
+      ['दशरथमृत्यु','Daśaratha-mṛtyu'],
+      ['भरतगमन','Bharata-gamana'],
+      ['भरतस्वप्न','Bharata-svapna'],
+      ['भरतशोक','Bharata-śoka'],
+      ['दशरथसंस्कार','Daśaratha-saṃskāra'],
+      ['राज्याभिषेकनिराकरण','Rājyābhiṣeka-nirākaraṇa'],
+      ['भरतयात्रा','Bharata-yātrā'],
+      ['भरद्वाजसमागम','Bharadvāja-samāgama'],
+      ['भरद्वाजवाक्य','Bharadvāja-vākya'],
+      ['चित्रकूटगमन','Citrakūṭa-gamana'],
+      ['रामदर्शन','Rāma-darśana'],
+      ['रामजटा','Rāma-jaṭā'],
+      ['रामे भरतवाक्य','Rāme Bharata-vākya'],
+      ['रामे भरतनिवेदन','Rāme Bharata-nivedana'],
+      ['जाबालिवाक्य','Jābāli-vākya'],
+      ['रामे वसिष्ठवाक्य','Rāme Vasiṣṭha-vākya'],
+      ['राज्यनिराकरण','Rājya-nirākaraṇa'],
+      ['पादुका','Pādukā'],
+      ['नंदिग्राम','Nandigrāma'],
+      ['दंडकप्रवेश','Daṇḍaka-praveśa'],
+      ['अत्रि','Atri'],
+      ['अनसूयावाक्य','Anasūyā-vākya'],
+      ['अनसूयासीतासंवाद','Anasūyā-Sītā-saṃvāda'],
+      ['अत्रिविदाय','Atri-vidāya'],
+      ['अत्रिआशीर्वाद','Atri-āśīrvāda'],
+      ['विराधदर्शन','Virādha-darśana'],
+      ['विराधवध','Virādha-vadha'],
+      ['शरभंग','Śarabhaṅga'],
+      ['सुतीक्ष्ण','Sutīkṣṇa'],
+      ['ऋषिसमागम','Ṛṣi-samāgama'],
+      ['अगस्त्यसमागम','Agastya-samāgama'],
+      ['अगस्त्यवाक्य','Agastya-vākya'],
+      ['पंचवटी','Pañcavaṭī'],
+      ['शूर्पणखावृत्तान्त','Śūrpaṇakhā-vṛttānta'],
+      ['शूर्पणखापराभव','Śūrpaṇakhā-parābhava'],
+      ['खर-दूषणवध','Khara-Dūṣaṇa-vadha'],
+      ['शूर्पणखारावणसमागम','Śūrpaṇakhā-Rāvaṇa-samāgama'],
+      ['रावण-मारीच','Rāvaṇa-Mārīca'],
+      ['सीताहरण','Sītā-haraṇa'],
+      ['जटायुयुद्ध','Jaṭāyu-yuddha'],
+      ['रामविलाप','Rāma-vilāpa'],
+      ['कबंधवध','Kabandha-vadha'],
+      ['शबरी','Śabarī'],
+    ], 119)
+  },
+  {
+    id:3, iitk:3,
+    deva:'अरण्यकाण्ड', roman:'Araṇya Kāṇḍa',
+    eng:'Book of the Forest',
+    vnetKey:'aranya',
+    sargas: buildSargaList(3, [], 75)
+  },
+  {
+    id:4, iitk:4,
+    deva:'किष्किन्धाकाण्ड', roman:'Kiṣkindhā Kāṇḍa',
+    eng:'Book of Kiṣkindhā',
+    vnetKey:'kish',
+    sargas: buildSargaList(4, [], 67)
+  },
+  {
+    id:5, iitk:5,
+    deva:'सुन्दरकाण्ड', roman:'Sundara Kāṇḍa',
+    eng:'Book of Beauty',
+    vnetKey:'sundara',
+    sargas: buildSargaList(5, [], 68)
+  },
+  {
+    id:6, iitk:6,
+    deva:'युद्धकाण्ड', roman:'Yuddha Kāṇḍa',
+    eng:'Book of War',
+    vnetKey:'yuddha',
+    sargas: buildSargaList(6, [], 128)
+  },
+  {
+    id:7, iitk:7,
+    deva:'उत्तरकाण्ड', roman:'Uttara Kāṇḍa',
+    eng:'Book of the Return',
+    vnetKey:'uttara',
+    sargas: buildSargaList(7, [], 111)
+  },
+];
+
+/* Build sarga list — named entries first, then numbered for remainder */
+function buildSargaList(kandaId, named, total) {
+  const list = [];
+  for (let i = 1; i <= total; i++) {
+    const n = named[i-1];
+    list.push({
+      n: i,
+      deva: n ? n[0] : `सर्ग ${toDeva(i)}`,
+      roman: n ? n[1] : `Sarga ${i}`,
+    });
+  }
+  return list;
+}
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+const PROXY = 'https://api.allorigins.win/raw?url=';
+let curKanda = null;   // kanda object
+let curSarga = null;   // sarga object
+let curVerses = [];    // [{iast, deva, hindi, engProse, words}]
+let curIdx = 0;
+let mode = 'hindi';
+let cache = {};        // key -> parsed data
+
+/* ═══════════════════════════════════════════════════════
+   UTILITIES
+═══════════════════════════════════════════════════════ */
+const DN = ['०','१','२','३','४','५','६','७','८','९'];
+function toDeva(n){ return String(n).split('').map(d=>DN[+d]||d).join(''); }
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>{ t.style.display='none'; }, 2200);
+}
+
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(name+'-screen').classList.add('active');
+}
+
+/* ═══════════════════════════════════════════════════════
+   IAST → DEVANAGARI  (lightweight lookup table)
+   Covers the full IAST character set used in GRETIL
+═══════════════════════════════════════════════════════ */
+const IAST2DEV = (function(){
+  // Vowels (independent)
+  const V = {
+    'a':'अ','ā':'आ','i':'इ','ī':'ई','u':'उ','ū':'ऊ',
+    'ṛ':'ऋ','ṝ':'ॠ','ḷ':'ऌ','e':'ए','ai':'ऐ','o':'ओ','au':'औ',
+  };
+  // Vowel matras (after consonant)
+  const M = {
+    'a':'','ā':'ा','i':'ि','ī':'ी','u':'ु','ū':'ू',
+    'ṛ':'ृ','ṝ':'ॄ','ḷ':'ॢ','e':'े','ai':'ै','o':'ो','au':'ौ',
+  };
+  // Consonants
+  const C = {
+    'k':'क','kh':'ख','g':'ग','gh':'घ','ṅ':'ङ',
+    'c':'च','ch':'छ','j':'ज','jh':'झ','ñ':'ञ',
+    'ṭ':'ट','ṭh':'ठ','ḍ':'ड','ḍh':'ढ','ṇ':'ण',
+    't':'त','th':'थ','d':'द','dh':'ध','n':'न',
+    'p':'प','ph':'फ','b':'ब','bh':'भ','m':'म',
+    'y':'य','r':'र','l':'ल','v':'व',
+    'ś':'श','ṣ':'ष','s':'स','h':'ह',
+    'ḻ':'ळ','kṣ':'क्ष','jñ':'ज्ञ',
+  };
+  const VIRAMA = '्';
+  const ANUSVARA = 'ṃ', VISARGA = 'ḥ';
+
+  // Sorted consonant keys longest first for greedy matching
+  const CKEYS = Object.keys(C).sort((a,b)=>b.length-a.length);
+  // Sorted vowel keys longest first
+  const VKEYS = Object.keys(V).sort((a,b)=>b.length-a.length);
+  // Matra keys same
+  const MKEYS = Object.keys(M).sort((a,b)=>b.length-a.length);
+
+  function convert(src){
+    let out = '', i = 0;
+    const s = src.toLowerCase();
+    while(i < s.length){
+      // anusvara
+      if(s[i]==='ṃ'){ out+='ं'; i++; continue; }
+      // visarga
+      if(s[i]==='ḥ'){ out+='ः'; i++; continue; }
+      // avagraha
+      if(s[i]==="'"){ out+='ऽ'; i++; continue; }
+      // digits, punctuation, space pass through
+      if(/[\d\s|।॥\-,.:;!?()[\]{}"']/.test(s[i])){ out+=s[i]; i++; continue; }
+
+      // Try consonant match
+      let matched = false;
+      for(const ck of CKEYS){
+        if(s.startsWith(ck, i)){
+          out += C[ck];
+          i += ck.length;
+          // Now look for vowel matra (or virama if next is consonant/end)
+          let vFound = false;
+          for(const mk of MKEYS){
+            if(s.startsWith(mk, i)){
+              out += M[mk];
+              i += mk.length;
+              vFound = true;
+              break;
+            }
+          }
+          if(!vFound){
+            // check if next char is anusvara/visarga/space/end — then inherent 'a'
+            // if next is consonant, add virama
+            const nc = s[i];
+            if(nc && nc!=='ṃ' && nc!=='ḥ' && !/[\s|।॥\-,.:;!?()[\]{}"'\d]/.test(nc)){
+              // another consonant follows — virama
+              out += VIRAMA;
+            }
+            // else inherent 'a' — nothing to add in Devanagari
+          }
+          matched = true;
+          break;
+        }
+      }
+      if(matched) continue;
+
+      // Try independent vowel
+      let vMatched = false;
+      for(const vk of VKEYS){
+        if(s.startsWith(vk, i)){
+          out += V[vk];
+          i += vk.length;
+          vMatched = true;
+          break;
+        }
+      }
+      if(vMatched) continue;
+
+      // Fallback — pass char through
+      out += src[i]; i++;
+    }
+    return out;
+  }
+  return { convert };
+})();
+
+/* ═══════════════════════════════════════════════════════
+   DATA FETCHING
+═══════════════════════════════════════════════════════ */
+
+/* IIT Kanpur URL — Hindi per-verse with word meanings */
+function iitUrl(kandaId, sargaNum){
+  return `https://www.valmiki.iitk.ac.in/sloka?field_kanda_tid=${kandaId}&language=dv&field_sarga_value=${sargaNum}`;
+}
+
+/* valmikiramayan.net URL — English word-for-word */
+function vnetUrl(kanda, sargaNum){
+  const padded = String(sargaNum).padStart(2,'');
+  return `https://www.valmikiramayan.net/utf8/${kanda.vnetKey}/sarga${sargaNum}/${kanda.vnetKey}sans${sargaNum}.htm`;
+}
+
+async function fetchProxy(url){
+  const res = await fetch(PROXY + encodeURIComponent(url));
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.text();
+}
+
+/* Parse GRETIL-style IAST text embedded in IIT Kanpur page */
+/* IIT Kanpur page structure:
+   - Sanskrit verse in Devanagari  (e.g. तच्छ्रुत्वा...)
+   - word-by-word in Devanagari    (e.g. राजशार्दूल: great king, ...)
+   - English translation sentence
+   Each verse block separated by <p> or identified by verse number pattern */
+
+function parseIITPage(html){
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+
+  // IIT Kanpur page: verse blocks are in the main content div
+  // Each shloka is a <p> with Devanagari, followed by word-analysis <p>, then English <p>
+  // We extract text nodes and classify them
+
+  const content = doc.querySelector('.field-items') ||
+                  doc.querySelector('.view-content') ||
+                  doc.querySelector('article') ||
+                  doc.body;
+
+  const verses = [];
+  // Get all paragraphs
+  const paras = Array.from(content.querySelectorAll('p, div.views-row'));
+
+  // IIT page repeating pattern per verse:
+  // 1. Summary line (optional, in [])
+  // 2. Sanskrit Devanagari shloka lines
+  // 3. Word-by-word Devanagari (word: meaning, word: meaning ...)
+  // 4. English prose translation
+  // Then next verse
+  // Verses end with verse number like ।।1.20.1।।
+
+  // Extract raw text blocks
+  const blocks = [];
+  for(const p of paras){
+    const t = p.innerText || p.textContent || '';
+    const trimmed = t.trim();
+    if(trimmed) blocks.push(trimmed);
+  }
+
+  // Group by verse: a shloka block contains ।। N.N.N ।।
+  const VERSE_END = /।।\s*\d+\.\d+\.\d+\s*।।/;
+  const WORD_BLOCK = /[a-zA-Zāīūṛṝḷṅñṭḍṇśṣḥṃ].*?=.*?\n?.*?[a-zA-Zāīūṛṝḷṅñṭḍṇśṣḥṃ]/i;
+
+  let i = 0;
+  while(i < blocks.length){
+    const b = blocks[i];
+    // Detect shloka block — contains Devanagari and verse marker
+    if(VERSE_END.test(b)){
+      // This block is the Sanskrit shloka
+      const shloka_deva = b.replace(VERSE_END,'').trim();
+      const numMatch = b.match(/।।\s*(\d+)\.(\d+)\.(\d+)\s*।।/);
+      const vnum = numMatch ? `${numMatch[1]}.${numMatch[2]}.${numMatch[3]}` : '';
+      const vnum_deva = vnum ? vnum.split('.').map(n=>toDeva(parseInt(n))).join('-') : '';
+
+      // Next block: word-by-word (contains Devanagari words with meanings)
+      let wordBlock = '', engBlock = '';
+      if(i+1 < blocks.length) wordBlock = blocks[i+1];
+      if(i+2 < blocks.length) engBlock = blocks[i+2];
+
+      // Parse word-by-word: "word: meaning, word: meaning" or "word meaning, word meaning"
+      const words = parseWordBlock(wordBlock);
+
+      verses.push({
+        num: vnum_deva,
+        deva: shloka_deva,
+        hindi: engBlock, // IIT provides English, we use as Hindi fallback label
+        words,
+      });
+      i += 3;
+    } else {
+      i++;
+    }
+  }
+  return verses;
+}
+
+function parseWordBlock(text){
+  if(!text) return [];
+  // Pattern: "word: meaning, word: meaning" or "word meaning\n word meaning"
+  const words = [];
+  // Split on comma or newline
+  const parts = text.split(/,|\n/);
+  for(const part of parts){
+    const p = part.trim();
+    if(!p) continue;
+    // Try "word: meaning" or "word = meaning"
+    const m = p.match(/^([^\:=]+)[\:=]\s*(.+)$/);
+    if(m){
+      const deva = m[1].trim();
+      const meaning = m[2].trim();
+      if(deva && meaning && deva.length < 50){
+        words.push([deva, '', meaning]);
+      }
+    }
+  }
+  return words;
+}
+
+/* Parse valmikiramayan.net page for English + word-for-word */
+function parseVnetPage(html){
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(html, 'text/html');
+  const body = doc.body;
+
+  const verses = [];
+  // valmikiramayan.net structure: each verse block has
+  //   - IAST verse text (roman with diacritics)
+  //   - Word parsing lines: "word + word = who, conduct-wise..."
+  //   - English prose sentence in quotes
+
+  const allText = body.innerText || body.textContent || '';
+  // Split on verse number patterns like [1-1-1] or 1-1-1
+  const blocks = allText.split(/\[\s*\d+[-–]\d+[-–]\d+\s*\]/);
+
+  // Also try to find verse numbers
+  const numMatches = [...allText.matchAll(/\[\s*(\d+)[-–](\d+)[-–](\d+)\s*\]/g)];
+
+  for(let i = 0; i < blocks.length - 1; i++){
+    const block = blocks[i+1]; // text after the verse number
+    const nm = numMatches[i];
+    if(!nm) continue;
+    const vnum = `${nm[1]}.${nm[2]}.${nm[3]}`;
+    const vnum_deva = vnum.split('.').map(n=>toDeva(parseInt(n))).join('-');
+
+    // Extract IAST verse (lines with | separating pādas)
+    const lines = block.split('\n').map(l=>l.trim()).filter(Boolean);
+
+    // English prose: usually in quotes "..."
+    const engMatch = block.match(/"([^"]{10,}?)"/);
+    const engProse = engMatch ? engMatch[1].trim() : '';
+
+    // Word-for-word lines: pattern "word + word = meaning"
+    const wordLines = lines.filter(l => /=/.test(l) && !/^"/.test(l) && l.length < 200);
+    const words = [];
+    for(const wl of wordLines){
+      const parts = wl.split('+').flatMap(p=>p.split(';'));
+      for(const part of parts){
+        const m = part.match(/^([^=]+)=\s*(.+)$/);
+        if(m){
+          const iast = m[1].trim().replace(/\*/g,'').trim();
+          const meaning = m[2].trim();
+          if(iast && meaning && iast.length < 60){
+            words.push([iast, iast, meaning]);
+          }
+        }
+      }
+    }
+
+    verses.push({ num: vnum_deva, iast:'', engProse, words });
+  }
+  return verses;
+}
+
+/* Merge IIT (Hindi) + vnet (English) into unified verse array */
+/* Also build IAST from IIT's Devanagari via reverse lookup (or use vnet IAST) */
+async function loadSarga(kanda, sarga){
+  const cacheKey = `${kanda.id}_${sarga.n}`;
+  if(cache[cacheKey]) return cache[cacheKey];
+
+  showVerseLoading('loading');
+
+  // Fetch both in parallel
+  const [iitHtml, vnetHtml] = await Promise.allSettled([
+    fetchProxy(iitUrl(kanda.iitk, sarga.n)),
+    fetchProxy(vnetUrl(kanda, sarga.n)),
+  ]);
+
+  const iitVerses = iitHtml.status==='fulfilled' ? parseIITPage(iitHtml.value) : [];
+  const vnetVerses = vnetHtml.status==='fulfilled' ? parseVnetPage(vnetHtml.value) : [];
+
+  // Merge by index
+  const count = Math.max(iitVerses.length, vnetVerses.length);
+  const merged = [];
+  for(let i = 0; i < count; i++){
+    const iit = iitVerses[i] || {};
+    const vn  = vnetVerses[i] || {};
+    merged.push({
+      num:      iit.num || vn.num || toDeva(i+1),
+      deva:     iit.deva || '',
+      iast:     vn.iast || '',
+      hindi:    iit.hindi || '',
+      engProse: vn.engProse || '',
+      hiWords:  iit.words || [],
+      enWords:  vn.words  || [],
+    });
+  }
+
+  // Fallback: if both failed, show error verse
+  if(!merged.length){
+    merged.push({
+      num: '?', deva:'', iast:'', hindi:'', engProse:'',
+      hiWords:[], enWords:[],
+      error: true,
+    });
+  }
+
+  cache[cacheKey] = merged;
+  return merged;
+}
+
+/* ═══════════════════════════════════════════════════════
+   KANDA SCREEN
+═══════════════════════════════════════════════════════ */
+function buildKandaScreen(){
+  const grid = document.getElementById('kanda-grid');
+  grid.innerHTML = KANDAS.map(k=>`
+    <div class="kanda-btn" onclick="selectKanda(${k.id})">
+      <span class="kb-deva">${k.deva}</span>
+      <span class="kb-roman">${k.roman}</span>
+      <span class="kb-count">${k.sargas.length} सर्ग · sargas</span>
+    </div>
+  `).join('');
+
+  // Show bookmark jump button if bookmark exists
+  const bm = getBm();
+  if(bm){
+    const k = KANDAS.find(k=>k.id===bm.kanda);
+    const s = k && k.sargas.find(s=>s.n===bm.sarga);
+    if(k && s){
+      const btn = document.getElementById('bm-jump');
+      btn.style.display = 'block';
+      btn.innerHTML = `🔖 Resume — ${k.deva}, सर्ग ${toDeva(bm.sarga)}, श्लोक ${toDeva(bm.verse+1)}`;
+    }
+  }
+}
+
+function selectKanda(id){
+  curKanda = KANDAS.find(k=>k.id===id);
+  buildSargaScreen();
+  showScreen('sarga');
+}
+
+/* ═══════════════════════════════════════════════════════
+   SARGA SCREEN
+═══════════════════════════════════════════════════════ */
+function buildSargaScreen(){
+  document.getElementById('sarga-back-label').textContent = 'काण्ड चुनें · Select Kāṇḍa';
+  document.getElementById('sarga-kanda-title').textContent =
+    `${curKanda.deva} — ${curKanda.roman} · ${curKanda.eng}`;
+
+  const list = document.getElementById('sarga-list');
+  list.innerHTML = curKanda.sargas.map(s=>`
+    <div class="sarga-item" onclick="selectSarga(${s.n})">
+      <span class="si-num">सर्ग ${toDeva(s.n)}</span>
+      <span class="si-name">${s.deva}
+        <span class="si-roman">${s.roman}</span>
+      </span>
+      <span class="si-arr">▶</span>
+    </div>
+  `).join('');
+}
+
+async function selectSarga(n){
+  curSarga = curKanda.sargas.find(s=>s.n===n);
+  // Update verse screen labels
+  document.getElementById('vs-deva').textContent =
+    `${curKanda.deva} · सर्ग ${toDeva(n)} — ${curSarga.deva}`;
+  document.getElementById('vs-roman').textContent =
+    `${curKanda.roman} · Sarga ${n} — ${curSarga.roman}`;
+
+  showScreen('verse');
+  curIdx = 0;
+  curVerses = [];
+  renderVerseLoading();
+
+  try {
+    curVerses = await loadSarga(curKanda, curSarga);
+    renderVerse();
+  } catch(e){
+    renderVerseError(e);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   VERSE SCREEN
+═══════════════════════════════════════════════════════ */
+function renderVerseLoading(){
+  document.getElementById('verse-area').innerHTML =
+    `<div class="loading-msg">॥ लोड हो रहा है… ॥<br><span style="font-family:var(--roman);font-size:0.75em">Loading sarga…</span></div>`;
+  document.getElementById('btn-prev').disabled = true;
+  document.getElementById('btn-next').disabled = true;
+}
+
+function renderVerseError(e){
+  document.getElementById('verse-area').innerHTML =
+    `<div class="err-msg">Could not load this sarga.<br>Please check your internet connection and try again.<br><small>${e.message||''}</small></div>`;
+}
+
+function renderVerse(){
+  if(!curVerses.length){ renderVerseLoading(); return; }
+  const v = curVerses[curIdx];
+  const area = document.getElementById('verse-area');
+  area.scrollTop = 0;
+
+  const bm = getBm();
+  const bmSet = (bm && bm.kanda===curKanda.id && bm.sarga===curSarga.n && bm.verse===curIdx);
+
+  // Devanagari display: use fetched deva, or convert from IAST if missing
+  const shlokaDeva = v.deva ||
+    (v.iast ? IAST2DEV.convert(v.iast) : '');
+  const shlokaIast = v.iast || '';
+
+  // Build word rows
+  function wordRows(words){
+    if(!words || !words.length) return '<tr><td colspan="3" style="color:var(--panel-dm);font-family:var(--roman);font-size:0.8em;padding:6px">Word analysis not available for this verse.</td></tr>';
+    return words.map(([d,i,m])=>`
+      <tr>
+        <td><span class="wd">${d}</span></td>
+        <td><span class="wi">${i||d}</span></td>
+        <td><span class="wm">${m}</span></td>
+      </tr>`).join('');
+  }
+
+  const errNote = v.error ?
+    `<div class="err-msg">Could not load verse data. Check connection.</div>` : '';
+
+  area.innerHTML = `
+    ${errNote}
+    <div class="v-meta">
+      <span class="v-num">॥ ${v.num} ॥</span>
+      <button class="bm-btn${bmSet?' set':''}" onclick="toggleBm()">
+        🔖 ${bmSet?'Bookmarked':'Bookmark'}
+      </button>
+    </div>
+
+    <!-- Sanskrit panel — always shown -->
+    <div class="panel">
+      <span class="sec-label">संस्कृत · Sanskrit</span>
+      <div class="shloka">${shlokaDeva.replace(/\n/g,'<br>').replace(/\|/g,'।')}</div>
+      ${shlokaIast ? `<div class="iast">${shlokaIast.replace(/\n/g,'<br>').replace(/\|/g,'|')}</div>` : ''}
+    </div>
+
+    <!-- Hindi panel -->
+    <div class="panel hi-only">
+      <span class="sec-label">हिंदी अनुवाद</span>
+      <div class="hindi-prose">${v.hindi || '<span style="color:var(--panel-dm);font-size:0.85em">हिंदी अनुवाद लोड हो रहा है…</span>'}</div>
+      <hr class="panel-hr">
+      <span class="sec-label">शब्दार्थ · Word Meanings</span>
+      <table class="word-table">
+        <thead><tr><th>शब्द</th><th>IAST / अर्थ</th><th>अर्थ</th></tr></thead>
+        <tbody>${wordRows(v.hiWords)}</tbody>
+      </table>
+    </div>
+
+    <!-- English panel -->
+    <div class="panel eng-only">
+      <span class="sec-label">English Translation</span>
+      <p class="eng-prose">${v.engProse || '<span style="color:var(--panel-dm);font-size:0.85em">English translation loading…</span>'}</p>
+      <hr class="panel-hr">
+      <span class="sec-label">Word by Word</span>
+      <table class="word-table">
+        <thead><tr><th>शब्द / Word</th><th>IAST</th><th>Meaning</th></tr></thead>
+        <tbody>${wordRows(v.enWords)}</tbody>
+      </table>
+    </div>
+  `;
+
+  // Counter
+  document.getElementById('v-cur').textContent = toDeva(curIdx+1);
+  document.getElementById('v-tot').textContent = '/ ' + toDeva(curVerses.length);
+  document.getElementById('btn-prev').disabled = curIdx === 0;
+  document.getElementById('btn-next').disabled = curIdx === curVerses.length-1;
+
+  // Save position
+  savePos();
+}
+
+function go(dir){
+  const next = curIdx + dir;
+  if(next < 0 || next >= curVerses.length) return;
+  curIdx = next;
+  renderVerse();
+}
+
+/* ═══════════════════════════════════════════════════════
+   BOOKMARK
+═══════════════════════════════════════════════════════ */
+function getBm(){
+  try{ return JSON.parse(localStorage.getItem('vr_bm')||'null'); }
+  catch(e){ return null; }
+}
+function saveBm(data){ localStorage.setItem('vr_bm', JSON.stringify(data)); }
+function clearBm(){ localStorage.removeItem('vr_bm'); }
+
+function toggleBm(){
+  const bm = getBm();
+  const isSet = bm && bm.kanda===curKanda.id && bm.sarga===curSarga.n && bm.verse===curIdx;
+  if(isSet){
+    clearBm();
+    toast('Bookmark removed');
+  } else {
+    saveBm({ kanda:curKanda.id, sarga:curSarga.n, verse:curIdx });
+    toast(`Bookmarked — ${curKanda.deva}, सर्ग ${toDeva(curSarga.n)}, श्लोक ${toDeva(curIdx+1)}`);
+  }
+  // Update button
+  const btn = document.querySelector('.bm-btn');
+  if(btn){
+    const nowSet = !isSet;
+    btn.classList.toggle('set', nowSet);
+    btn.innerHTML = '🔖 ' + (nowSet ? 'Bookmarked' : 'Bookmark');
+  }
+}
+
+function savePos(){
+  if(curKanda && curSarga){
+    localStorage.setItem('vr_pos', JSON.stringify({
+      kanda: curKanda.id, sarga: curSarga.n, verse: curIdx
+    }));
+  }
+}
+
+async function jumpToBookmark(){
+  const bm = getBm();
+  if(!bm) return;
+  const k = KANDAS.find(k=>k.id===bm.kanda);
+  if(!k) return;
+  curKanda = k;
+  const s = k.sargas.find(s=>s.n===bm.sarga);
+  if(!s) return;
+  curSarga = s;
+  curIdx = bm.verse || 0;
+  document.getElementById('vs-deva').textContent =
+    `${curKanda.deva} · सर्ग ${toDeva(s.n)} — ${s.deva}`;
+  document.getElementById('vs-roman').textContent =
+    `${curKanda.roman} · Sarga ${s.n} — ${s.roman}`;
+  showScreen('verse');
+  renderVerseLoading();
+  try {
+    curVerses = await loadSarga(curKanda, curSarga);
+    renderVerse();
+  } catch(e){ renderVerseError(e); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   SETTINGS
+═══════════════════════════════════════════════════════ */
+function setMode(m){
+  mode = m;
+  document.body.className = document.body.className.replace(/mode-\w+/,'') + ' mode-' + m;
+  document.getElementById('btn-hi').classList.toggle('active', m==='hindi');
+  document.getElementById('btn-en').classList.toggle('active', m==='eng');
+  localStorage.setItem('vr_mode', m);
+}
+
+function toggleTheme(){
+  const goLight = !document.body.classList.contains('light');
+  document.body.classList.toggle('light', goLight);
+  document.getElementById('theme-btn').textContent = goLight ? '☀️' : '🌙';
+  localStorage.setItem('vr_theme', goLight ? 'light' : 'dark');
+}
+
+function setSize(v){
+  document.documentElement.style.setProperty('--fs', v+'px');
+  localStorage.setItem('vr_size', v);
+}
+
+/* ═══════════════════════════════════════════════════════
+   SWIPE
+═══════════════════════════════════════════════════════ */
+let _tx = null;
+document.getElementById('verse-area').addEventListener('touchstart', e=>{
+  _tx = e.touches[0].clientX;
+},{ passive:true });
+document.getElementById('verse-area').addEventListener('touchend', e=>{
+  if(_tx===null) return;
+  const dx = e.changedTouches[0].clientX - _tx;
+  _tx = null;
+  if(Math.abs(dx)<50) return;
+  if(document.getElementById('verse-screen').classList.contains('active')) go(dx<0?1:-1);
+},{ passive:true });
+
+/* ═══════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════ */
+(function init(){
+  const m  = localStorage.getItem('vr_mode')  || 'hindi';
+  const th = localStorage.getItem('vr_theme') || 'dark';
+  const sz = localStorage.getItem('vr_size')  || '18';
+
+  setMode(m);
+  if(th==='light'){
+    document.body.classList.add('light');
+    document.getElementById('theme-btn').textContent = '☀️';
+  }
+  document.getElementById('size-range').value = sz;
+  setSize(sz);
+
+  buildKandaScreen();
+  showScreen('kanda');
+})();
+</script>
+</body>
+</html>
