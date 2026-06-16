@@ -16,31 +16,41 @@
               "n": 1, "nd": "१",
               "sa": "तपः स्वाध्यायनिरतं तपस्विनं वाग्विदां वरम् ।\nनारदं परिपप्रच्छ वाल्मीकिर्मुनिपुङ्गवम् ॥",
               "ro": "tapaḥ svādhyāya-nirataṃ tapasvinaṃ vāgvidāṃ varam |\nnāradaṃ paripapraccha vālmīkir munipuṅgavam ||",
-              "wbw": [{"s":"तपः","m":"penance"},{"s":"स्वाध्यायनिरतम्","m":"devoted to self-study"},{"s":"तपस्विनम्","m":"the ascetic"},{"s":"वाग्विदाम्","m":"among those who know speech"},{"s":"वरम्","m":"the foremost"},{"s":"नारदम्","m":"Narada"},{"s":"परिपप्रच्छ","m":"asked"},{"s":"वाल्मीकिः","m":"Valmiki"},{"s":"मुनिपुङ्गवम्","m":"foremost among sages"}]
+              "hi": "तपस्या और स्वाध्याय में निरत, तपस्वी, वाणी के ज्ञाताओं में श्रेष्ठ मुनिराज नारद जी से मुनिश्रेष्ठ वाल्मीकि ने प्रश्न किया।",
+              "en": "Valmiki, foremost among sages, questioned Narada — devoted to penance and study, an ascetic, best among those who know the power of speech.",
+              "wbw": [{"s":"तपः","m":"penance, ascetic practice"},{"s":"स्वाध्यायनिरतम्","m":"devoted to self-study of the Vedas"},{"s":"तपस्विनम्","m":"the ascetic"},{"s":"वाग्विदाम्","m":"among those who know speech"},{"s":"वरम्","m":"the foremost, the best"},{"s":"नारदम्","m":"Narada (the divine sage)"},{"s":"परिपप्रच्छ","m":"asked, enquired"},{"s":"वाल्मीकिः","m":"the sage Valmiki"},{"s":"मुनिपुङ्गवम्","m":"foremost among sages"}]
             },
             {
               "n": 2, "nd": "२",
               "sa": "को न्वस्मिन् साम्प्रतं लोके गुणवान् कश्च वीर्यवान् ।\nधर्मज्ञश्च कृतज्ञश्च सत्यवाक्यो दृढव्रतः ॥",
               "ro": "ko nvasmin sāmpratam loke guṇavān kaśca vīryavān |\ndharma-jñaśca kṛta-jñaśca satya-vākyo dṛḍha-vrataḥ ||",
-              "wbw": [{"s":"कः","m":"who"},{"s":"नु","m":"indeed"},{"s":"अस्मिन्","m":"in this"},{"s":"साम्प्रतम्","m":"at this time"},{"s":"लोके","m":"in the world"},{"s":"गुणवान्","m":"virtuous"},{"s":"वीर्यवान्","m":"valiant"},{"s":"धर्मज्ञः","m":"knower of righteousness"},{"s":"कृतज्ञः","m":"grateful"},{"s":"सत्यवाक्यः","m":"true in speech"},{"s":"दृढव्रतः","m":"firm in vows"}]
+              "hi": "इस समय इस संसार में कौन ऐसा है जो गुणवान् है, वीर्यवान् है, धर्मज्ञ है, कृतज्ञ है, सत्यवादी है और दृढ़-प्रतिज्ञ है?",
+              "en": "Who in this world today is truly virtuous? Who is valiant? Who knows righteousness, is grateful, speaks only truth, and is firm in his vows?",
+              "wbw": [{"s":"कः","m":"who"},{"s":"नु","m":"indeed, pray tell"},{"s":"अस्मिन्","m":"in this"},{"s":"साम्प्रतम्","m":"at this time, now"},{"s":"लोके","m":"in the world"},{"s":"गुणवान्","m":"possessed of virtues"},{"s":"वीर्यवान्","m":"possessed of valour"},{"s":"धर्मज्ञः","m":"knower of righteousness"},{"s":"कृतज्ञः","m":"grateful, remembers good done"},{"s":"सत्यवाक्यः","m":"whose speech is always true"},{"s":"दृढव्रतः","m":"firm in his vows"}]
             },
             {
               "n": 3, "nd": "३",
               "sa": "चारित्रेण च को युक्तः सर्वभूतेषु को हितः ।\nविद्वान् कः कः समर्थश्च कश्चैकप्रियदर्शनः ॥",
               "ro": "cāritreṇa ca ko yuktaḥ sarvabhūteṣu ko hitaḥ |\nvidvān kaḥ kaḥ samarthaśca kaścaika-priya-darśanaḥ ||",
-              "wbw": [{"s":"चारित्रेण","m":"in character"},{"s":"युक्तः","m":"endowed with"},{"s":"सर्वभूतेषु","m":"towards all beings"},{"s":"हितः","m":"well-wisher"},{"s":"विद्वान्","m":"learned"},{"s":"समर्थः","m":"capable"},{"s":"प्रियदर्शनः","m":"pleasing to behold"}]
+              "hi": "चरित्र से कौन सम्पन्न है? सभी प्राणियों के लिए कौन हितकारी है? विद्वान् कौन है? समर्थ कौन है? और किसका दर्शन प्रिय लगता है?",
+              "en": "Who is endowed with noble character? Who is a well-wisher of all living beings? Who is learned? Who is capable? And whose very sight is pleasing to behold?",
+              "wbw": [{"s":"चारित्रेण","m":"in character, in conduct"},{"s":"युक्तः","m":"endowed with, possessed of"},{"s":"सर्वभूतेषु","m":"towards all living beings"},{"s":"हितः","m":"beneficial, a well-wisher"},{"s":"विद्वान्","m":"learned, wise"},{"s":"समर्थः","m":"capable, able"},{"s":"प्रियदर्शनः","m":"pleasing to behold"}]
             },
             {
               "n": 4, "nd": "४",
               "sa": "आत्मवान् को जितक्रोधो द्युतिमान् कोऽनसूयकः ।\nकस्य बिभ्यति देवाश्च जातरोषस्य संयुगे ॥",
               "ro": "ātmavān ko jita-krodho dyutimān ko'nasūyakaḥ |\nkasya bibhyati devāśca jāta-roṣasya saṃyuge ||",
-              "wbw": [{"s":"आत्मवान्","m":"self-possessed"},{"s":"जितक्रोधः","m":"conquered anger"},{"s":"द्युतिमान्","m":"radiant"},{"s":"अनसूयकः","m":"free from envy"},{"s":"कस्य","m":"of whom"},{"s":"बिभ्यति","m":"are afraid"},{"s":"देवाः","m":"the gods"},{"s":"जातरोषस्य","m":"when angered"},{"s":"संयुगे","m":"in battle"}]
+              "hi": "कौन आत्मज्ञानी है, क्रोध को जीतने वाला है, तेजस्वी है और ईर्ष्या-रहित है? युद्ध में क्रोधित होने पर किससे देवता भी डरते हैं?",
+              "en": "Who is self-possessed, who has conquered anger, who is radiant, free from envy? Even the gods — when that person's wrath is kindled in battle — of whom are they afraid?",
+              "wbw": [{"s":"आत्मवान्","m":"self-possessed, wise about the self"},{"s":"जितक्रोधः","m":"who has conquered anger"},{"s":"द्युतिमान्","m":"resplendent, radiant"},{"s":"अनसूयकः","m":"free from jealousy and envy"},{"s":"कस्य","m":"of whom"},{"s":"बिभ्यति","m":"are afraid"},{"s":"देवाः","m":"the gods"},{"s":"जातरोषस्य","m":"when his anger is aroused"},{"s":"संयुगे","m":"in battle"}]
             },
             {
               "n": 5, "nd": "५",
               "sa": "एतदिच्छाम्यहं श्रोतुं परं कौतूहलं हि मे ।\nमहर्षे त्वं समर्थोऽसि ज्ञातुमेवंविधं नरम् ॥",
               "ro": "etad icchāmy ahaṃ śrotuṃ paraṃ kautūhalaṃ hi me |\nmaharṣe tvaṃ samartho'si jñātum evaṃ-vidhaṃ naram ||",
-              "wbw": [{"s":"एतत्","m":"this"},{"s":"इच्छामि","m":"I wish"},{"s":"अहम्","m":"I"},{"s":"श्रोतुम्","m":"to hear"},{"s":"परम्","m":"great"},{"s":"कौतूहलम्","m":"curiosity"},{"s":"महर्षे","m":"O great sage"},{"s":"त्वम्","m":"you"},{"s":"समर्थः","m":"capable"},{"s":"ज्ञातुम्","m":"to know"},{"s":"नरम्","m":"the person"}]
+              "hi": "हे महर्षि! मैं यही सुनना चाहता हूँ, मुझे बड़ी जिज्ञासा है। आप ही ऐसे पुरुष को जानने में समर्थ हैं।",
+              "en": "O great sage, I wish to hear of such a person — my curiosity is immense. You alone are capable of knowing a man of this kind.",
+              "wbw": [{"s":"एतत्","m":"this"},{"s":"इच्छामि","m":"I wish, I desire"},{"s":"अहम्","m":"I"},{"s":"श्रोतुम्","m":"to hear"},{"s":"परम्","m":"great, intense"},{"s":"कौतूहलम्","m":"curiosity, eagerness to know"},{"s":"महर्षे","m":"O great sage (vocative)"},{"s":"त्वम्","m":"you"},{"s":"समर्थः","m":"capable, able"},{"s":"ज्ञातुम्","m":"to know, to identify"},{"s":"नरम्","m":"the man, the person"}]
             }
           ]
         }
