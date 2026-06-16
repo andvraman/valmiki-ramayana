@@ -1,0 +1,14 @@
+{
+  "name": "वाल्मीकि रामायण",
+  "short_name": "रामायण",
+  "description": "Valmiki Ramayana — Sanskrit text with Hindi and English translations",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FDF6E3",
+  "theme_color": "#C8720A",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

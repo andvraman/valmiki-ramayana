@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="sa" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="रामायण">
+<meta name="description" content="Valmiki Ramayana — Sanskrit with Hindi and English translation">
+<title>वाल्मीकि रामायण</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app" data-theme="light" data-fontsize="medium">
+
+  <!-- ══════════════════════════════════════════ -->
+  <!--  SCREEN 1 — HOME                          -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="home-screen" class="screen active">
+
+    <div id="home-top">
+      <div id="home-om">🕉</div>
+      <div id="home-title-sa">वाल्मीकि रामायण</div>
+      <div id="home-title-en">Valmiki Ramayana</div>
+    </div>
+
+    <button id="continue-btn" onclick="continueReading()">
+      <div id="continue-label">▶ Continue Reading</div>
+      <div id="continue-loc"></div>
+    </button>
+
+    <div id="kanda-section-label">Seven Kāṇḍas · सात काण्ड</div>
+    <div id="kanda-list"></div>
+
+    <div id="home-footer">
+      <button id="home-ctrl-light" class="home-ctrl active" onclick="setHomeTheme('light')">☀ Light</button>
+      <button id="home-ctrl-dark"  class="home-ctrl"        onclick="setHomeTheme('dark')">☽ Dark</button>
+      <button class="home-ctrl" onclick="openSettings()">⚙ Settings</button>
+    </div>
+
+  </div><!-- /home-screen -->
+
+  <!-- ══════════════════════════════════════════ -->
+  <!--  SCREEN 2 — SARGA LIST                    -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="sarga-screen" class="screen">
+
+    <div class="s-header">
+      <button class="back-btn" onclick="backToHome()">← काण्ड</button>
+      <div style="flex:1;min-width:0">
+        <div id="sarga-screen-title" class="s-header-title"></div>
+        <div id="sarga-screen-sub"
+          style="font-family:var(--font-lat);font-size:var(--fs-xs);
+            color:var(--ink-soft);font-style:italic;margin-top:1px"></div>
+      </div>
+      <button class="icon-btn" onclick="openSettings()">⚙</button>
+    </div>
+
+    <div id="sarga-list-scroll"></div>
+
+  </div><!-- /sarga-screen -->
+
+  <!-- ══════════════════════════════════════════ -->
+  <!--  SCREEN 3 — SHLOKA READER                 -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="reader-screen" class="screen">
+
+    <!-- Header -->
+    <div class="s-header">
+      <button class="back-btn" onclick="backToSarga()">← सर्ग</button>
+      <span id="reader-counter"
+        style="font-family:var(--font-lat);font-size:var(--fs-sm);color:var(--ink-soft)">
+      </span>
+      <button class="icon-btn" onclick="openSettings()">⚙</button>
+    </div>
+
+    <!-- Progress -->
+    <div id="reader-progress" class="progress-bar"></div>
+
+    <!-- Language tabs -->
+    <div id="lang-bar">
+      <button class="lang-tab active" id="tab-hi" onclick="setLang('hi')">हिंदी</button>
+      <button class="lang-tab"        id="tab-en" onclick="setLang('en')">English</button>
+    </div>
+
+    <!-- Scrollable content -->
+    <div id="reader-scroll">
+
+      <div id="watermark">१</div>
+
+      <div id="sarga-sublabel">बालकाण्ड · सर्ग १ · श्लोक १</div>
+
+      <div id="sanskrit-block">
+        <div id="sanskrit-text"></div>
+        <div id="roman-text"></div>
+      </div>
+
+      <div class="verse-divider"></div>
+
+      <div id="trans-block">
+        <div id="trans-label">हिंदी अर्थ</div>
+        <div id="trans-text"></div>
+      </div>
+
+      <button id="wbw-toggle" onclick="toggleWBW()">
+        <span>शब्द-अर्थ &nbsp;·&nbsp; Word by Word</span>
+        <em id="wbw-arrow">▾</em>
+      </button>
+
+      <div id="wbw-panel">
+        <div class="wbw-note">Word meanings in English · Source: ramayana.info</div>
+        <div id="wbw-content"></div>
+      </div>
+
+    </div><!-- /reader-scroll -->
+
+    <!-- Footer nav -->
+    <div id="reader-footer">
+      <div id="nav-row">
+        <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">◀ पूर्व</button>
+        <button class="nav-btn" id="next-btn" onclick="navigate(1)">अगला ▶</button>
+      </div>
+      <button id="bookmark-btn" onclick="toggleBookmark()">
+        <span>🔖</span>
+        <span id="bm-label">Save Position · स्थान सुरक्षित करें</span>
+      </button>
+    </div>
+
+  </div><!-- /reader-screen -->
+
+  <!-- ══════════════════════════════════════════ -->
+  <!--  SETTINGS PANEL (overlays all screens)    -->
+  <!-- ══════════════════════════════════════════ -->
+  <div id="settings-panel">
+    <div id="settings-header">
+      <span id="settings-title">सेटिंग्स · Settings</span>
+      <button class="icon-btn" style="font-size:1.3rem" onclick="closeSettings()">✕</button>
+    </div>
+
+    <div class="s-section">
+      <div class="s-label">Translation Language · अनुवाद भाषा</div>
+      <div class="toggle-row">
+        <button class="tog active" id="slang-hi" onclick="setLang('hi');closeSettings()">हिंदी</button>
+        <button class="tog"        id="slang-en" onclick="setLang('en');closeSettings()">English</button>
+      </div>
+    </div>
+
+    <div class="s-section">
+      <div class="s-label">Theme · थीम</div>
+      <div class="toggle-row">
+        <button class="tog active" id="theme-light" onclick="setTheme('light')">☀ Light</button>
+        <button class="tog"        id="theme-dark"  onclick="setTheme('dark')">☽ Dark</button>
+      </div>
+    </div>
+
+    <div class="s-section">
+      <div class="s-label">Font Size · अक्षर आकार</div>
+      <div class="toggle-row">
+        <button class="tog"        id="size-small"  onclick="setSize('small')">अ Small</button>
+        <button class="tog active" id="size-medium" onclick="setSize('medium')">अ Med</button>
+        <button class="tog"        id="size-large"  onclick="setSize('large')">अ Large</button>
+      </div>
+    </div>
+
+    <div class="s-section">
+      <div class="s-label">Romanisation · रोमन लिपि</div>
+      <div class="toggle-row">
+        <button class="tog active" id="roman-off" onclick="setRoman(false)">Off</button>
+        <button class="tog"        id="roman-on"  onclick="setRoman(true)">On</button>
+      </div>
+    </div>
+
+    <div class="attribution">
+      <strong>Sanskrit text:</strong> GRETIL, Göttingen University<br>
+      <a href="https://gretil.sub.uni-goettingen.de" target="_blank">gretil.sub.uni-goettingen.de</a>
+      &nbsp;·&nbsp; CC BY-NC-SA 4.0<br><br>
+      <strong>Translations &amp; word meanings:</strong><br>
+      <a href="https://ramayana.info" target="_blank">ramayana.info</a>
+      &nbsp;·&nbsp; Fetched live, cached after first read<br><br>
+      Personal use only &nbsp;·&nbsp; Not for commercial distribution
+    </div>
+  </div><!-- /settings-panel -->
+
+  <div id="toast"></div>
+
+</div><!-- /app -->
+<script src="app.js"></script>
+</body>
+</html>
