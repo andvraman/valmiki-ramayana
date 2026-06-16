@@ -28,6 +28,20 @@ const LS = {
 // Translation cache in memory (also persisted to localStorage)
 const trCache = {};
 
+// ── DEVANAGARI NUMERALS ──
+const DEV_DIGITS = ['०','१','२','३','४','५','६','७','८','९'];
+function toDevanagari(n) {
+  return String(n).split('').map(d => DEV_DIGITS[parseInt(d)] ?? d).join('');
+}
+// Returns sarga label depending on current language
+function sargaNum(n) {
+  return lang === 'hi' ? `सर्ग ${toDevanagari(n)}` : `Sarga ${n}`;
+}
+// Returns kanda label depending on current language
+function kandaNum(n) {
+  return lang === 'hi' ? `काण्ड ${toDevanagari(n)}` : `Kanda ${n}`;
+}
+
 // ── BOOT ──
 async function boot() {
   // Load preferences
@@ -120,7 +134,7 @@ function renderHome() {
     if (k && sa && sh) {
       btn.classList.add('visible');
       document.getElementById('continue-loc').textContent =
-        `${k.name_sa} · सर्ग ${bmSarga + 1} · श्लोक ${sh.nd}`;
+        `${k.name_sa} · सर्ग ${toDevanagari(bmSarga + 1)} · श्लोक ${sh.nd}`;
     }
   } else {
     btn.classList.remove('visible');
@@ -134,7 +148,7 @@ function renderHome() {
     card.className = 'kanda-card';
     card.innerHTML = `
       <div class="kanda-card-left">
-        <div class="kanda-num">काण्ड ${i + 1}</div>
+        <div class="kanda-num">${kandaNum(i + 1)}</div>
         <div class="kanda-name-sa">${k.name_sa}</div>
         <div class="kanda-name-en">${k.name_roman} · ${k.name_en}</div>
       </div>
@@ -184,9 +198,9 @@ function openKanda(ki) {
     row.className = 'sarga-row' + (isBm ? ' bookmarked' : '');
     row.innerHTML = `
       <div class="sarga-left">
-        <div class="sarga-num">Sarga ${si + 1}</div>
+        <div class="sarga-num">${sargaNum(si + 1)}</div>
         <div class="sarga-name-sa">${sa.title_sa || ''}</div>
-        <div class="sarga-name-en">${sa.title_en || ''} · ${sa.shlokas.length} shlokas</div>
+        <div class="sarga-name-en">${sa.title_en || ''} · ${lang === 'hi' ? toDevanagari(sa.shlokas.length) : sa.shlokas.length} shlokas</div>
       </div>
       <div class="sarga-right">
         ${isBm ? '<span class="sarga-bm">🔖</span>' : ''}
@@ -237,9 +251,10 @@ function paintShloka(dir) {
     // Watermark & labels
     document.getElementById('watermark').textContent = sh.nd;
     document.getElementById('sarga-sublabel').textContent =
-      `${k.name_sa} · सर्ग ${curSarga + 1} · श्लोक ${sh.nd}`;
-    document.getElementById('reader-counter').textContent =
-      `${sh.n} / ${sa.shlokas.length}`;
+      `${k.name_sa} · सर्ग ${toDevanagari(curSarga + 1)} · श्लोक ${sh.nd}`;
+    document.getElementById('reader-counter').textContent = lang === 'hi'
+      ? `${sh.nd} / ${toDevanagari(sa.shlokas.length)}`
+      : `${sh.n} / ${sa.shlokas.length}`;
 
     // Sanskrit
     document.getElementById('sanskrit-text').innerHTML = sh.sa.replace(/\n/g, '<br>');
@@ -433,7 +448,7 @@ function toggleBookmark() {
     localStorage.setItem(LS.bmS,  bmSarga);
     localStorage.setItem(LS.bmSh, bmShloka);
     const sh = DB.kandas[curKanda].sargas[curSarga].shlokas[curShloka];
-    showToast(`Saved · ${DB.kandas[curKanda].name_sa} · सर्ग ${curSarga+1} · ${sh.nd}`);
+    showToast(`Saved · ${DB.kandas[curKanda].name_sa} · सर्ग ${toDevanagari(curSarga+1)} · ${sh.nd}`);
     renderHome();
   }
   updateBmBtn();
