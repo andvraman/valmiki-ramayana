@@ -1,0 +1,56 @@
+{
+  "kandas": [
+    {
+      "id": 1,
+      "name_sa": "बालकाण्ड",
+      "name_roman": "Bālakāṇḍa",
+      "name_en": "Bala Kanda",
+      "sarga_count": 77,
+      "sargas": [
+        {
+          "id": 1,
+          "title_sa": "नारदसंवाद",
+          "title_en": "Dialogue with Narada",
+          "shlokas": [
+            {
+              "n": 1, "nd": "१",
+              "sa": "तपः स्वाध्यायनिरतं तपस्विनं वाग्विदां वरम् ।\nनारदं परिपप्रच्छ वाल्मीकिर्मुनिपुङ्गवम् ॥",
+              "ro": "tapaḥ svādhyāya-nirataṃ tapasvinaṃ vāgvidāṃ varam |\nnāradaṃ paripapraccha vālmīkir munipuṅgavam ||",
+              "wbw": [{"s":"तपः","m":"penance"},{"s":"स्वाध्यायनिरतम्","m":"devoted to self-study"},{"s":"तपस्विनम्","m":"the ascetic"},{"s":"वाग्विदाम्","m":"among those who know speech"},{"s":"वरम्","m":"the foremost"},{"s":"नारदम्","m":"Narada"},{"s":"परिपप्रच्छ","m":"asked"},{"s":"वाल्मीकिः","m":"Valmiki"},{"s":"मुनिपुङ्गवम्","m":"foremost among sages"}]
+            },
+            {
+              "n": 2, "nd": "२",
+              "sa": "को न्वस्मिन् साम्प्रतं लोके गुणवान् कश्च वीर्यवान् ।\nधर्मज्ञश्च कृतज्ञश्च सत्यवाक्यो दृढव्रतः ॥",
+              "ro": "ko nvasmin sāmpratam loke guṇavān kaśca vīryavān |\ndharma-jñaśca kṛta-jñaśca satya-vākyo dṛḍha-vrataḥ ||",
+              "wbw": [{"s":"कः","m":"who"},{"s":"नु","m":"indeed"},{"s":"अस्मिन्","m":"in this"},{"s":"साम्प्रतम्","m":"at this time"},{"s":"लोके","m":"in the world"},{"s":"गुणवान्","m":"virtuous"},{"s":"वीर्यवान्","m":"valiant"},{"s":"धर्मज्ञः","m":"knower of righteousness"},{"s":"कृतज्ञः","m":"grateful"},{"s":"सत्यवाक्यः","m":"true in speech"},{"s":"दृढव्रतः","m":"firm in vows"}]
+            },
+            {
+              "n": 3, "nd": "३",
+              "sa": "चारित्रेण च को युक्तः सर्वभूतेषु को हितः ।\nविद्वान् कः कः समर्थश्च कश्चैकप्रियदर्शनः ॥",
+              "ro": "cāritreṇa ca ko yuktaḥ sarvabhūteṣu ko hitaḥ |\nvidvān kaḥ kaḥ samarthaśca kaścaika-priya-darśanaḥ ||",
+              "wbw": [{"s":"चारित्रेण","m":"in character"},{"s":"युक्तः","m":"endowed with"},{"s":"सर्वभूतेषु","m":"towards all beings"},{"s":"हितः","m":"well-wisher"},{"s":"विद्वान्","m":"learned"},{"s":"समर्थः","m":"capable"},{"s":"प्रियदर्शनः","m":"pleasing to behold"}]
+            },
+            {
+              "n": 4, "nd": "४",
+              "sa": "आत्मवान् को जितक्रोधो द्युतिमान् कोऽनसूयकः ।\nकस्य बिभ्यति देवाश्च जातरोषस्य संयुगे ॥",
+              "ro": "ātmavān ko jita-krodho dyutimān ko'nasūyakaḥ |\nkasya bibhyati devāśca jāta-roṣasya saṃyuge ||",
+              "wbw": [{"s":"आत्मवान्","m":"self-possessed"},{"s":"जितक्रोधः","m":"conquered anger"},{"s":"द्युतिमान्","m":"radiant"},{"s":"अनसूयकः","m":"free from envy"},{"s":"कस्य","m":"of whom"},{"s":"बिभ्यति","m":"are afraid"},{"s":"देवाः","m":"the gods"},{"s":"जातरोषस्य","m":"when angered"},{"s":"संयुगे","m":"in battle"}]
+            },
+            {
+              "n": 5, "nd": "५",
+              "sa": "एतदिच्छाम्यहं श्रोतुं परं कौतूहलं हि मे ।\nमहर्षे त्वं समर्थोऽसि ज्ञातुमेवंविधं नरम् ॥",
+              "ro": "etad icchāmy ahaṃ śrotuṃ paraṃ kautūhalaṃ hi me |\nmaharṣe tvaṃ samartho'si jñātum evaṃ-vidhaṃ naram ||",
+              "wbw": [{"s":"एतत्","m":"this"},{"s":"इच्छामि","m":"I wish"},{"s":"अहम्","m":"I"},{"s":"श्रोतुम्","m":"to hear"},{"s":"परम्","m":"great"},{"s":"कौतूहलम्","m":"curiosity"},{"s":"महर्षे","m":"O great sage"},{"s":"त्वम्","m":"you"},{"s":"समर्थः","m":"capable"},{"s":"ज्ञातुम्","m":"to know"},{"s":"नरम्","m":"the person"}]
+            }
+          ]
+        }
+      ]
+    },
+    { "id": 2, "name_sa": "अयोध्याकाण्ड", "name_roman": "Ayodhyākāṇḍa", "name_en": "Ayodhya Kanda", "sarga_count": 119, "sargas": [] },
+    { "id": 3, "name_sa": "अरण्यकाण्ड",  "name_roman": "Araṇyakāṇḍa",  "name_en": "Aranya Kanda",  "sarga_count": 75,  "sargas": [] },
+    { "id": 4, "name_sa": "किष्किन्धाकाण्ड", "name_roman": "Kiṣkindhākāṇḍa", "name_en": "Kishkindha Kanda", "sarga_count": 67, "sargas": [] },
+    { "id": 5, "name_sa": "सुन्दरकाण्ड",  "name_roman": "Sundarakāṇḍa",  "name_en": "Sundara Kanda",  "sarga_count": 68, "sargas": [] },
+    { "id": 6, "name_sa": "युद्धकाण्ड",   "name_roman": "Yuddhakāṇḍa",   "name_en": "Yuddha Kanda",   "sarga_count": 128, "sargas": [] },
+    { "id": 7, "name_sa": "उत्तरकाण्ड",   "name_roman": "Uttarakāṇḍa",   "name_en": "Uttara Kanda",  "sarga_count": 111, "sargas": [] }
+  ]
+}
