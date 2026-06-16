@@ -1,194 +1,56 @@
-<!DOCTYPE html>
-<html lang="sa" dir="ltr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="रामायण">
-<meta name="description" content="Valmiki Ramayana — Sanskrit with Hindi and English translation">
-<title>वाल्मीकि रामायण</title>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div id="app" data-theme="light" data-fontsize="medium">
-
-  <!-- ══════════════════════════════════════════ -->
-  <!--  SCREEN 1 — HOME                          -->
-  <!-- ══════════════════════════════════════════ -->
-  <div id="home-screen" class="screen active">
-
-    <div id="home-top">
-      <div id="home-om">🕉</div>
-      <div id="home-title-sa">वाल्मीकि रामायण</div>
-      <div id="home-title-en">Valmiki Ramayana</div>
-    </div>
-
-    <button id="continue-btn" onclick="continueReading()">
-      <div id="continue-label">▶ Continue Reading</div>
-      <div id="continue-loc"></div>
-    </button>
-
-    <div id="kanda-section-label">Seven Kāṇḍas · सात काण्ड</div>
-    <div id="kanda-list"></div>
-
-    <div id="home-footer">
-      <button id="home-ctrl-light" class="home-ctrl active" onclick="setHomeTheme('light')">☀ Light</button>
-      <button id="home-ctrl-dark"  class="home-ctrl"        onclick="setHomeTheme('dark')">☽ Dark</button>
-      <button class="home-ctrl" onclick="openSettings()">⚙ Settings</button>
-    </div>
-
-  </div><!-- /home-screen -->
-
-  <!-- ══════════════════════════════════════════ -->
-  <!--  SCREEN 2 — SARGA LIST                    -->
-  <!-- ══════════════════════════════════════════ -->
-  <div id="sarga-screen" class="screen">
-
-    <div class="s-header">
-      <button class="back-btn" onclick="backToHome()">← काण्ड</button>
-      <div style="flex:1;min-width:0">
-        <div id="sarga-screen-title" class="s-header-title"></div>
-        <div id="sarga-screen-sub"
-          style="font-family:var(--font-lat);font-size:var(--fs-xs);
-            color:var(--ink-soft);font-style:italic;margin-top:1px"></div>
-      </div>
-      <button class="icon-btn" onclick="openSettings()">⚙</button>
-    </div>
-
-    <div id="sarga-list-scroll"></div>
-
-  </div><!-- /sarga-screen -->
-
-  <!-- ══════════════════════════════════════════ -->
-  <!--  SCREEN 3 — SHLOKA READER                 -->
-  <!-- ══════════════════════════════════════════ -->
-  <div id="reader-screen" class="screen">
-
-    <!-- Header -->
-    <div class="s-header">
-      <button class="back-btn" onclick="backToSarga()">← सर्ग</button>
-      <span id="reader-counter"
-        style="font-family:var(--font-lat);font-size:var(--fs-sm);color:var(--ink-soft)">
-      </span>
-      <button class="icon-btn" onclick="openSettings()">⚙</button>
-    </div>
-
-    <!-- Progress -->
-    <div id="reader-progress" class="progress-bar"></div>
-
-    <!-- Language tabs -->
-    <div id="lang-bar">
-      <button class="lang-tab active" id="tab-hi" onclick="setLang('hi')">हिंदी</button>
-      <button class="lang-tab"        id="tab-en" onclick="setLang('en')">English</button>
-    </div>
-
-    <!-- Scrollable content -->
-    <div id="reader-scroll">
-
-      <div id="watermark">१</div>
-
-      <div id="sarga-sublabel">बालकाण्ड · सर्ग १ · श्लोक १</div>
-
-      <div id="sanskrit-block">
-        <div id="sanskrit-text"></div>
-        <div id="roman-text"></div>
-      </div>
-
-      <div class="verse-divider"></div>
-
-      <div id="trans-block">
-        <div id="trans-label">हिंदी अर्थ</div>
-        <div id="trans-text"></div>
-      </div>
-
-      <button id="wbw-toggle" onclick="toggleWBW()">
-        <span>शब्द-अर्थ &nbsp;·&nbsp; Word by Word</span>
-        <em id="wbw-arrow">▾</em>
-      </button>
-
-      <div id="wbw-panel">
-        <div class="wbw-note">Word meanings in English · Source: ramayana.info</div>
-        <div id="wbw-content"></div>
-      </div>
-
-    </div><!-- /reader-scroll -->
-
-    <!-- Footer nav -->
-    <div id="reader-footer">
-      <div id="nav-row">
-        <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">◀ पूर्व</button>
-        <button class="nav-btn" id="next-btn" onclick="navigate(1)">अगला ▶</button>
-      </div>
-      <button id="bookmark-btn" onclick="toggleBookmark()">
-        <span>🔖</span>
-        <span id="bm-label">Save Position · स्थान सुरक्षित करें</span>
-      </button>
-    </div>
-
-  </div><!-- /reader-screen -->
-
-  <!-- ══════════════════════════════════════════ -->
-  <!--  SETTINGS PANEL (overlays all screens)    -->
-  <!-- ══════════════════════════════════════════ -->
-  <div id="settings-panel">
-    <div id="settings-header">
-      <span id="settings-title">सेटिंग्स · Settings</span>
-      <button class="icon-btn" style="font-size:1.3rem" onclick="closeSettings()">✕</button>
-    </div>
-
-    <div class="s-section">
-      <div class="s-label">Translation Language · अनुवाद भाषा</div>
-      <div class="toggle-row">
-        <button class="tog active" id="slang-hi" onclick="setLang('hi');closeSettings()">हिंदी</button>
-        <button class="tog"        id="slang-en" onclick="setLang('en');closeSettings()">English</button>
-      </div>
-    </div>
-
-    <div class="s-section">
-      <div class="s-label">Theme · थीम</div>
-      <div class="toggle-row">
-        <button class="tog active" id="theme-light" onclick="setTheme('light')">☀ Light</button>
-        <button class="tog"        id="theme-dark"  onclick="setTheme('dark')">☽ Dark</button>
-      </div>
-    </div>
-
-    <div class="s-section">
-      <div class="s-label">Font Size · अक्षर आकार</div>
-      <div class="toggle-row">
-        <button class="tog"        id="size-small"  onclick="setSize('small')">अ Small</button>
-        <button class="tog active" id="size-medium" onclick="setSize('medium')">अ Med</button>
-        <button class="tog"        id="size-large"  onclick="setSize('large')">अ Large</button>
-      </div>
-    </div>
-
-    <div class="s-section">
-      <div class="s-label">Romanisation · रोमन लिपि</div>
-      <div class="toggle-row">
-        <button class="tog active" id="roman-off" onclick="setRoman(false)">Off</button>
-        <button class="tog"        id="roman-on"  onclick="setRoman(true)">On</button>
-      </div>
-    </div>
-
-    <div class="attribution">
-      <strong>Sanskrit text:</strong> GRETIL, Göttingen University<br>
-      <a href="https://gretil.sub.uni-goettingen.de" target="_blank">gretil.sub.uni-goettingen.de</a>
-      &nbsp;·&nbsp; CC BY-NC-SA 4.0<br><br>
-      <strong>Translations &amp; word meanings:</strong><br>
-      <a href="https://ramayana.info" target="_blank">ramayana.info</a>
-      &nbsp;·&nbsp; Fetched live, cached after first read<br><br>
-      Personal use only &nbsp;·&nbsp; Not for commercial distribution
-    </div>
-  </div><!-- /settings-panel -->
-
-  <div id="toast"></div>
-
-</div><!-- /app -->
-<script src="app.js"></script>
-</body>
-</html>
+{
+  "kandas": [
+    {
+      "id": 1,
+      "name_sa": "बालकाण्ड",
+      "name_roman": "Bālakāṇḍa",
+      "name_en": "Bala Kanda",
+      "sarga_count": 77,
+      "sargas": [
+        {
+          "id": 1,
+          "title_sa": "नारदसंवाद",
+          "title_en": "Dialogue with Narada",
+          "shlokas": [
+            {
+              "n": 1, "nd": "१",
+              "sa": "तपः स्वाध्यायनिरतं तपस्विनं वाग्विदां वरम् ।\nनारदं परिपप्रच्छ वाल्मीकिर्मुनिपुङ्गवम् ॥",
+              "ro": "tapaḥ svādhyāya-nirataṃ tapasvinaṃ vāgvidāṃ varam |\nnāradaṃ paripapraccha vālmīkir munipuṅgavam ||",
+              "wbw": [{"s":"तपः","m":"penance"},{"s":"स्वाध्यायनिरतम्","m":"devoted to self-study"},{"s":"तपस्विनम्","m":"the ascetic"},{"s":"वाग्विदाम्","m":"among those who know speech"},{"s":"वरम्","m":"the foremost"},{"s":"नारदम्","m":"Narada"},{"s":"परिपप्रच्छ","m":"asked"},{"s":"वाल्मीकिः","m":"Valmiki"},{"s":"मुनिपुङ्गवम्","m":"foremost among sages"}]
+            },
+            {
+              "n": 2, "nd": "२",
+              "sa": "को न्वस्मिन् साम्प्रतं लोके गुणवान् कश्च वीर्यवान् ।\nधर्मज्ञश्च कृतज्ञश्च सत्यवाक्यो दृढव्रतः ॥",
+              "ro": "ko nvasmin sāmpratam loke guṇavān kaśca vīryavān |\ndharma-jñaśca kṛta-jñaśca satya-vākyo dṛḍha-vrataḥ ||",
+              "wbw": [{"s":"कः","m":"who"},{"s":"नु","m":"indeed"},{"s":"अस्मिन्","m":"in this"},{"s":"साम्प्रतम्","m":"at this time"},{"s":"लोके","m":"in the world"},{"s":"गुणवान्","m":"virtuous"},{"s":"वीर्यवान्","m":"valiant"},{"s":"धर्मज्ञः","m":"knower of righteousness"},{"s":"कृतज्ञः","m":"grateful"},{"s":"सत्यवाक्यः","m":"true in speech"},{"s":"दृढव्रतः","m":"firm in vows"}]
+            },
+            {
+              "n": 3, "nd": "३",
+              "sa": "चारित्रेण च को युक्तः सर्वभूतेषु को हितः ।\nविद्वान् कः कः समर्थश्च कश्चैकप्रियदर्शनः ॥",
+              "ro": "cāritreṇa ca ko yuktaḥ sarvabhūteṣu ko hitaḥ |\nvidvān kaḥ kaḥ samarthaśca kaścaika-priya-darśanaḥ ||",
+              "wbw": [{"s":"चारित्रेण","m":"in character"},{"s":"युक्तः","m":"endowed with"},{"s":"सर्वभूतेषु","m":"towards all beings"},{"s":"हितः","m":"well-wisher"},{"s":"विद्वान्","m":"learned"},{"s":"समर्थः","m":"capable"},{"s":"प्रियदर्शनः","m":"pleasing to behold"}]
+            },
+            {
+              "n": 4, "nd": "४",
+              "sa": "आत्मवान् को जितक्रोधो द्युतिमान् कोऽनसूयकः ।\nकस्य बिभ्यति देवाश्च जातरोषस्य संयुगे ॥",
+              "ro": "ātmavān ko jita-krodho dyutimān ko'nasūyakaḥ |\nkasya bibhyati devāśca jāta-roṣasya saṃyuge ||",
+              "wbw": [{"s":"आत्मवान्","m":"self-possessed"},{"s":"जितक्रोधः","m":"conquered anger"},{"s":"द्युतिमान्","m":"radiant"},{"s":"अनसूयकः","m":"free from envy"},{"s":"कस्य","m":"of whom"},{"s":"बिभ्यति","m":"are afraid"},{"s":"देवाः","m":"the gods"},{"s":"जातरोषस्य","m":"when angered"},{"s":"संयुगे","m":"in battle"}]
+            },
+            {
+              "n": 5, "nd": "५",
+              "sa": "एतदिच्छाम्यहं श्रोतुं परं कौतूहलं हि मे ।\nमहर्षे त्वं समर्थोऽसि ज्ञातुमेवंविधं नरम् ॥",
+              "ro": "etad icchāmy ahaṃ śrotuṃ paraṃ kautūhalaṃ hi me |\nmaharṣe tvaṃ samartho'si jñātum evaṃ-vidhaṃ naram ||",
+              "wbw": [{"s":"एतत्","m":"this"},{"s":"इच्छामि","m":"I wish"},{"s":"अहम्","m":"I"},{"s":"श्रोतुम्","m":"to hear"},{"s":"परम्","m":"great"},{"s":"कौतूहलम्","m":"curiosity"},{"s":"महर्षे","m":"O great sage"},{"s":"त्वम्","m":"you"},{"s":"समर्थः","m":"capable"},{"s":"ज्ञातुम्","m":"to know"},{"s":"नरम्","m":"the person"}]
+            }
+          ]
+        }
+      ]
+    },
+    { "id": 2, "name_sa": "अयोध्याकाण्ड", "name_roman": "Ayodhyākāṇḍa", "name_en": "Ayodhya Kanda", "sarga_count": 119, "sargas": [] },
+    { "id": 3, "name_sa": "अरण्यकाण्ड",  "name_roman": "Araṇyakāṇḍa",  "name_en": "Aranya Kanda",  "sarga_count": 75,  "sargas": [] },
+    { "id": 4, "name_sa": "किष्किन्धाकाण्ड", "name_roman": "Kiṣkindhākāṇḍa", "name_en": "Kishkindha Kanda", "sarga_count": 67, "sargas": [] },
+    { "id": 5, "name_sa": "सुन्दरकाण्ड",  "name_roman": "Sundarakāṇḍa",  "name_en": "Sundara Kanda",  "sarga_count": 68, "sargas": [] },
+    { "id": 6, "name_sa": "युद्धकाण्ड",   "name_roman": "Yuddhakāṇḍa",   "name_en": "Yuddha Kanda",   "sarga_count": 128, "sargas": [] },
+    { "id": 7, "name_sa": "उत्तरकाण्ड",   "name_roman": "Uttarakāṇḍa",   "name_en": "Uttara Kanda",  "sarga_count": 111, "sargas": [] }
+  ]
+}
