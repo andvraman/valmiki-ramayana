@@ -187,6 +187,69 @@ header{flex-shrink:0;background:var(--bg-card);border-bottom:1px solid var(--gol
 .v-tot{font-size:0.6rem;color:var(--text-dim);}
 
 #toast{display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--saffron);color:#fff;padding:8px 18px;border-radius:18px;font-size:0.78rem;font-family:var(--ui);box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:300;pointer-events:none;white-space:nowrap;}
+
+/* ── About panel ── */
+#about-panel{
+  display:none;position:absolute;inset:0;
+  background:var(--bg);z-index:200;
+  flex-direction:column;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+#about-panel.open{display:flex;}
+.about-header{
+  flex-shrink:0;display:flex;align-items:center;
+  justify-content:space-between;
+  padding:12px 16px;border-bottom:1px solid var(--gold-dim);
+  background:var(--bg-card);
+}
+.about-title{
+  font-family:var(--deva);font-size:0.95rem;
+  color:var(--gold);font-weight:700;
+}
+.about-close{
+  background:none;border:1px solid var(--gold-dim);
+  border-radius:6px;color:var(--text-dim);
+  cursor:pointer;font-size:0.8rem;padding:4px 10px;
+  font-family:var(--ui);
+}
+.about-body{padding:20px 18px 40px;}
+.about-section{margin-bottom:24px;}
+.about-section-title{
+  font-family:var(--ui);font-size:0.6rem;font-weight:700;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--saffron);margin-bottom:12px;display:block;
+}
+.about-source{
+  margin-bottom:14px;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--gold-dim);
+}
+.about-source:last-child{border-bottom:none;padding-bottom:0;}
+.about-source-name{
+  font-family:var(--roman);font-size:0.9rem;font-weight:600;
+  color:var(--gold);display:block;margin-bottom:3px;
+}
+.about-source-url{
+  font-family:var(--roman);font-size:0.72rem;
+  color:var(--saffron);display:block;margin-bottom:4px;
+}
+.about-source-desc{
+  font-family:var(--roman);font-size:0.78rem;
+  color:var(--text-dim);line-height:1.6;
+}
+.about-hindi{
+  font-family:var(--deva);font-size:0.82rem;
+  color:var(--text);line-height:1.9;
+  background:var(--bg-card);border:1px solid var(--gold-dim);
+  border-radius:8px;padding:12px 14px;margin-top:8px;
+}
+.about-app-note{
+  font-family:var(--roman);font-size:0.72rem;
+  color:var(--text-dim);line-height:1.7;
+  text-align:center;margin-top:28px;
+  padding-top:16px;border-top:1px solid var(--gold-dim);
+  font-style:italic;
+}
 @media(max-width:380px){:root{--fs:16px;}}
 </style>
 </head>
@@ -208,6 +271,7 @@ header{flex-shrink:0;background:var(--bg-card);border-bottom:1px solid var(--gol
   </div>
   <span class="jai-ram">॥ जय श्री राम ॥</span>
   <div class="h-controls">
+    <button class="icon-btn" onclick="openAbout()" title="About &amp; Sources">ℹ️</button>
     <button class="icon-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
   </div>
 </header>
@@ -255,6 +319,64 @@ header{flex-shrink:0;background:var(--bg-card);border-bottom:1px solid var(--gol
     <button class="nav-btn" id="btn-prev" onclick="go(-1)" disabled><span class="nav-arr">◀</span> पूर्व</button>
     <div class="v-counter"><span class="v-cur" id="v-cur">—</span><span class="v-tot" id="v-tot">/ —</span></div>
     <button class="nav-btn" id="btn-next" onclick="go(1)" disabled>अग्र <span class="nav-arr">▶</span></button>
+  </div>
+</div>
+
+<!-- About panel -->
+<div id="about-panel">
+  <div class="about-header">
+    <span class="about-title">Sources &amp; Acknowledgements</span>
+    <button class="about-close" onclick="closeAbout()">✕ Close</button>
+  </div>
+  <div class="about-body">
+
+    <div class="about-section">
+      <span class="about-section-title">Sanskrit Text</span>
+      <div class="about-source">
+        <span class="about-source-name">GRETIL</span>
+        <span class="about-source-url">gretil.sub.uni-goettingen.de</span>
+        <span class="about-source-desc">Göttingen Register of Electronic Texts in Indian Languages — complete Sanskrit text of the Vālmīki Rāmāyaṇa, all 7 Kāṇḍas. Göttingen State and University Library, Germany.</span>
+      </div>
+      <div class="about-source">
+        <span class="about-source-name">IIT Kanpur</span>
+        <span class="about-source-url">valmiki.iitk.ac.in</span>
+        <span class="about-source-desc">Sanskrit text with IAST transliteration and English word-by-word analysis. Indian Institute of Technology, Kanpur.</span>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <span class="about-section-title">Hindi Translation</span>
+      <div class="about-source">
+        <span class="about-source-name">ramcharit.in</span>
+        <span class="about-source-url">ramcharit.in</span>
+        <span class="about-source-desc">Verse-by-verse Hindi translation based on the Gita Press, Gorakhpur edition.</span>
+        <div class="about-hindi">ramcharit.in को हार्दिक धन्यवाद — श्रीमद् वाल्मीकि रामायण के सर्ग-वार, श्लोक-वार हिंदी अनुवाद के लिये, जो गीताप्रेस, गोरखपुर के अनुवाद पर आधारित है। यह सेवा निःशुल्क और सर्वसुलभ रूप में उपलब्ध कराने के लिये ramcharit.in का अभिनन्दन।</div>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <span class="about-section-title">English Translation &amp; Word Analysis</span>
+      <div class="about-source">
+        <span class="about-source-name">Desiraju Hanumanta Rao</span>
+        <span class="about-source-url">valmikiramayan.net</span>
+        <span class="about-source-desc">English translation with detailed word-for-word analysis of every verse.</span>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <span class="about-section-title">Verse Dataset</span>
+      <div class="about-source">
+        <span class="about-source-name">Valmiki Ramayan Dataset</span>
+        <span class="about-source-url">github.com/AshuVj/Valmiki_Ramayan_Dataset</span>
+        <span class="about-source-desc">Structured verse-by-verse dataset with Sanskrit, transliteration, word meanings and English explanation. MIT licence.</span>
+      </div>
+    </div>
+
+    <p class="about-app-note">
+      This app was built for personal Sanskrit study.<br>
+      All source texts remain the property of their respective owners.
+    </p>
+
   </div>
 </div>
 
@@ -644,6 +766,13 @@ function toggleTheme(){
 function setSize(v){
   document.documentElement.style.setProperty('--fs', v+'px');
   localStorage.setItem('vr_size', v);
+}
+
+function openAbout(){
+  document.getElementById('about-panel').classList.add('open');
+}
+function closeAbout(){
+  document.getElementById('about-panel').classList.remove('open');
 }
 
 /* ══════════════════════════════════════════════════
