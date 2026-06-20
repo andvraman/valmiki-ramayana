@@ -624,12 +624,26 @@ function renderVerse(){
   const bmSet = bm && bm.kanda === curKanda.id && bm.sarga === curSarga && bm.verse === curIdx;
 
   // Clean shloka text — remove verse stamp like ।।1.1.1।।
-  const shlokaRaw = (v.shloka_text || '').replace(/।।[\d.]+।।/g,'').trim();
+  // Clean shloka_text: remove verse stamps (ASCII & Devanagari digits), stray numbers
+  const shlokaRaw = (v.shloka_text || '')
+    .replace(/।।[\d.]+।।/g,'')           // stamps with ASCII digits: ।।1.16.5।।
+    .replace(/।।[०-९.]+।।/g,'')          // stamps with Devanagari digits
+    .replace(/\|\|[\d.\s-]+\|\|/g,'')    // || N || format
+    .replace(/\(\d+\)/g,'')              // (4) style references
+    .replace(/\b\d{1,4}\b/g,'')          // stray ASCII numbers 1-4 digits
+    .replace(/\s{2,}/g,' ')
+    .trim();
   // Format: split on ' । ' for line breaks
   const shlokaDisplay = shlokaRaw.replace(/\s*।\s*/g,' ।\n').replace(/\n\s*\n/g,'\n').trim();
 
-  // IAST
-  const iast = (v.transliteration || '').replace(/।।[\d.]+।।/g,'').trim();
+  // IAST — same cleaning
+  const iast = (v.transliteration || '')
+    .replace(/।।[\d.]+।।/g,'')
+    .replace(/\|\|[\d.\s-]+\|\|/g,'')
+    .replace(/\(\d+\)/g,'')
+    .replace(/\b\d{1,4}\b/g,'')
+    .replace(/\s{2,}/g,' ')
+    .trim();
 
   // Parse word table from translation field
   const words = parseWordTable(v.translation || '');
@@ -641,7 +655,7 @@ function renderVerse(){
   const summary = curIdx === 0 && v.comments ? v.comments.trim() : '';
 
   // Hindi entry from loaded JSON (null if file not yet available)
-  const hindiEntry = getHindi(curIdx + 1);
+  const hindiEntry = getHindi(v.shloka || (curIdx + 1));
 
   function wordRows(ws){
     if(!ws.length) return `<tr><td colspan="2" style="font-family:var(--roman);font-size:0.8em;color:var(--panel-dm);padding:6px">Word analysis not available.</td></tr>`;
@@ -653,7 +667,7 @@ function renderVerse(){
 
   area.innerHTML = `
     <div class="v-meta">
-      <span class="v-num">॥ ${toDeva(curKanda.id.charAt(0)==='B'&&curKanda.id.includes('Bala')?1:curKanda.id.includes('Ayodhya')?2:curKanda.id.includes('Aranya')?3:curKanda.id.includes('Kish')?4:curKanda.id.includes('Sun')?5:curKanda.id.includes('Yuddha')?6:7)}-${toDeva(curSarga)}-${toDeva(curIdx+1)} ॥</span>
+      <span class="v-num">॥ ${toDeva(curKanda.id.includes('Bala')?1:curKanda.id.includes('Ayodhya')?2:curKanda.id.includes('Aranya')?3:curKanda.id.includes('Kish')?4:curKanda.id.includes('Sun')?5:curKanda.id.includes('Yuddha')?6:7)}-${toDeva(curSarga)}-${toDeva(v.shloka||curIdx+1)} ॥</span>
       <button class="bm-btn${bmSet?' set':''}" onclick="toggleBm()">🔖 ${bmSet?'Bookmarked':'Bookmark'}</button>
     </div>
 
