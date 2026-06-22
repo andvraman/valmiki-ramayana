@@ -138,10 +138,36 @@ header{flex-shrink:0;background:var(--bg-card);border-bottom:1px solid var(--gol
 }
 .lang-tab.active{color:var(--saffron);border-bottom-color:var(--saffron);font-weight:600;}
 
-/* ── Progress bar ── */
+/* ── Scrub bar (tappable progress) ── */
 #progress-bar{
-  flex-shrink:0;height:2px;background:var(--saffron);
-  width:0%;transition:width .3s ease;
+  flex-shrink:0;height:10px;background:var(--gold-dim);
+  position:relative;cursor:pointer;touch-action:none;
+  -webkit-tap-highlight-color:transparent;
+}
+#progress-fill{
+  height:100%;background:var(--saffron);
+  width:0%;pointer-events:none;
+}
+#scrub-thumb{
+  position:absolute;top:50%;right:auto;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--saffron);border:2px solid var(--bg);
+  transform:translate(-50%,-50%);
+  pointer-events:none;left:0%;
+  transition:left .1s ease;
+}
+#scrub-tip{
+  position:absolute;bottom:14px;
+  background:var(--saffron);color:#fff;
+  font-family:var(--deva);font-size:0.7rem;
+  padding:2px 7px;border-radius:4px;
+  transform:translateX(-50%);left:0%;
+  white-space:nowrap;display:none;pointer-events:none;
+}
+#scrub-tip::after{
+  content:'';position:absolute;top:100%;left:50%;
+  transform:translateX(-50%);
+  border:4px solid transparent;border-top-color:var(--saffron);
 }
 
 /* ── Translation panel — warm parchment ── */
@@ -182,9 +208,27 @@ header{flex-shrink:0;background:var(--bg-card);border-bottom:1px solid var(--gol
 .nav-btn:active{background:var(--gold-dim);}
 .nav-btn:disabled{opacity:.25;pointer-events:none;}
 .nav-arr{font-size:1rem;color:var(--gold);}
-.v-counter{text-align:center;min-width:52px;flex-shrink:0;}
+.v-counter{text-align:center;flex-shrink:0;}
 .v-cur{font-family:var(--deva);font-size:1.05rem;color:var(--gold);display:block;line-height:1;}
 .v-tot{font-size:0.6rem;color:var(--text-dim);}
+/* Jump input */
+.jump-wrap{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.jump-lbl{font-family:var(--deva);font-size:0.7rem;color:var(--text-dim);}
+#jump-input{
+  width:38px;background:var(--bg);
+  border:1px solid var(--gold);border-radius:6px;
+  color:var(--gold);font-family:var(--deva);font-size:0.88rem;
+  padding:4px 4px;text-align:center;
+  -webkit-tap-highlight-color:transparent;
+}
+#jump-input:focus{outline:none;border-color:var(--saffron);}
+#jump-btn{
+  background:var(--saffron);border:none;border-radius:6px;
+  color:#fff;font-family:var(--deva);font-size:0.72rem;
+  padding:5px 8px;cursor:pointer;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;
+}
+#jump-btn:active{opacity:.8;}
 
 #toast{display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--saffron);color:#fff;padding:8px 18px;border-radius:18px;font-size:0.78rem;font-family:var(--ui);box-shadow:0 4px 16px rgba(0,0,0,.4);z-index:300;pointer-events:none;white-space:nowrap;}
 
@@ -281,7 +325,11 @@ header{flex-shrink:0;background:var(--bg-card);border-bottom:1px solid var(--gol
   <button class="lang-tab active" id="tab-hi" onclick="setMode('hindi')">हिंदी</button>
   <button class="lang-tab"        id="tab-en" onclick="setMode('eng')">English</button>
 </div>
-<div id="progress-bar"></div>
+<div id="progress-bar" onpointerdown="scrubStart(event)" onpointermove="scrubMove(event)" onpointerup="scrubEnd(event)" onpointercancel="scrubEnd(event)">
+  <div id="progress-fill"></div>
+  <div id="scrub-thumb"></div>
+  <div id="scrub-tip"></div>
+</div>
 
 <!-- SCREEN 1: Kanda -->
 <div id="kanda-screen" class="screen active">
@@ -318,6 +366,11 @@ header{flex-shrink:0;background:var(--bg-card);border-bottom:1px solid var(--gol
   <div id="nav-bar">
     <button class="nav-btn" id="btn-prev" onclick="go(-1)" disabled><span class="nav-arr">◀</span> पूर्व</button>
     <div class="v-counter"><span class="v-cur" id="v-cur">—</span><span class="v-tot" id="v-tot">/ —</span></div>
+    <div class="jump-wrap">
+      <label class="jump-lbl" for="jump-input">श्लोक</label>
+      <input id="jump-input" type="text" inputmode="numeric" maxlength="3" placeholder="—" autocomplete="off">
+      <button id="jump-btn" onclick="jumpToVerse()">जाएँ</button>
+    </div>
     <button class="nav-btn" id="btn-next" onclick="go(1)" disabled>अग्र <span class="nav-arr">▶</span></button>
   </div>
 </div>
@@ -713,9 +766,8 @@ function renderVerse(){
   document.getElementById('v-tot').textContent = '/ '+toDeva(curVerses.length);
   document.getElementById('btn-prev').disabled = curIdx === 0;
   document.getElementById('btn-next').disabled = curIdx === curVerses.length-1;
-  // Progress bar
-  const pb = document.getElementById('progress-bar');
-  if(pb && curVerses.length) pb.style.width = ((curIdx+1)/curVerses.length*100)+'%';
+  // Scrub bar
+  updateScrub();
   savePos();
 }
 
@@ -788,6 +840,82 @@ function openAbout(){
 function closeAbout(){
   document.getElementById('about-panel').classList.remove('open');
 }
+
+/* ══════════════════════════════════════════════════
+   SCRUB BAR
+══════════════════════════════════════════════════ */
+let _scrubbing = false;
+
+function scrubPct(e){
+  const bar = document.getElementById('progress-bar');
+  const rect = bar.getBoundingClientRect();
+  return Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+}
+
+function updateScrub(){
+  if(!curVerses.length) return;
+  const pct = curIdx / Math.max(1, curVerses.length - 1);
+  const fill  = document.getElementById('progress-fill');
+  const thumb = document.getElementById('scrub-thumb');
+  const tip   = document.getElementById('scrub-tip');
+  if(fill)  fill.style.width  = (pct*100)+'%';
+  if(thumb) thumb.style.left  = (pct*100)+'%';
+  if(tip){  tip.style.left    = (pct*100)+'%';
+            tip.textContent   = 'श्लोक '+toDeva(curIdx+1); }
+}
+
+function scrubStart(e){
+  if(!document.getElementById('verse-screen').classList.contains('active')) return;
+  if(!curVerses.length) return;
+  _scrubbing = true;
+  document.getElementById('progress-bar').setPointerCapture(e.pointerId);
+  scrubTo(scrubPct(e));
+  const tip = document.getElementById('scrub-tip');
+  if(tip) tip.style.display = 'block';
+}
+
+function scrubMove(e){
+  if(!_scrubbing) return;
+  scrubTo(scrubPct(e));
+}
+
+function scrubEnd(e){
+  if(!_scrubbing) return;
+  _scrubbing = false;
+  const tip = document.getElementById('scrub-tip');
+  if(tip) tip.style.display = 'none';
+}
+
+function scrubTo(pct){
+  const idx = Math.round(pct * (curVerses.length - 1));
+  if(idx !== curIdx){ curIdx = idx; renderVerse(); }
+  else updateScrub();
+}
+
+/* ══════════════════════════════════════════════════
+   JUMP TO VERSE
+══════════════════════════════════════════════════ */
+function jumpToVerse(){
+  const inp = document.getElementById('jump-input');
+  if(!inp || !curVerses.length) return;
+  const raw = inp.value.trim();
+  const dmap = {'०':0,'१':1,'२':2,'३':3,'४':4,'५':5,'६':6,'७':7,'८':8,'९':9};
+  const normalized = raw.split('').map(c => dmap[c] !== undefined ? dmap[c] : c).join('');
+  const n = parseInt(normalized, 10);
+  if(isNaN(n) || n < 1 || n > curVerses.length){
+    toast('श्लोक '+toDeva(1)+'–'+toDeva(curVerses.length)+' दर्ज करें');
+    inp.value = ''; return;
+  }
+  curIdx = n - 1;
+  renderVerse();
+  inp.value = '';
+  inp.blur();
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  const inp = document.getElementById('jump-input');
+  if(inp) inp.addEventListener('keydown', e=>{ if(e.key==='Enter') jumpToVerse(); });
+});
 
 /* ══════════════════════════════════════════════════
    SWIPE
