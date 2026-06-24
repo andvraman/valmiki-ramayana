@@ -677,6 +677,12 @@ function renderVerse(){
   const bmSet = bm && bm.kanda === curKanda.id && bm.sarga === curSarga && bm.verse === curIdx;
 
   // Clean shloka text — remove verse stamp like ।।1.1.1।।
+  // Detect if this verse's Sanskrit is identical to the previous verse
+  // (AshuVj dataset issue: combined-translation verses share shloka_text)
+  const prevV = curIdx > 0 ? curVerses[curIdx - 1] : null;
+  const isDupSanskrit = prevV && v.shloka_text &&
+    (v.shloka_text.trim() === (prevV.shloka_text || '').trim());
+
   // Clean shloka_text: remove verse stamps (ASCII & Devanagari digits), stray numbers
   const shlokaRaw = (v.shloka_text || '')
     .replace(/।।[\d.]+।।/g,'')           // stamps with ASCII digits: ।।1.16.5।।
@@ -728,8 +734,13 @@ function renderVerse(){
     <div class="panel">
       <span class="sec-label">संस्कृत · Sanskrit</span>
       ${summary ? `<div class="sarga-summary">${summary}</div>` : ''}
-      <div class="shloka">${shlokaDisplay.replace(/\n/g,'<br>')}</div>
-      ${iast ? `<div class="iast">${iast.replace(/।।/g,'').replace(/।/g,' |').trim()}</div>` : ''}
+      ${isDupSanskrit
+        ? `<div class="hindi-notice" style="font-style:normal;">
+             📌 इस श्लोक का संस्कृत पाठ पिछले श्लोक के साथ सम्मिलित है।
+           </div>`
+        : `<div class="shloka">${shlokaDisplay.replace(/\n/g,'<br>')}</div>
+           ${iast ? `<div class="iast">${iast.replace(/।।/g,'').replace(/।/g,' |').trim()}</div>` : ''}`
+      }
     </div>
 
     <!-- Hindi mode: prose translation + notice + word table -->
