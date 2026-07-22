@@ -679,8 +679,8 @@ function renderVerse(){
   // Clean shloka text — remove verse stamp like ।।1.1.1।।
   // Clean shloka_text: remove verse stamps (ASCII & Devanagari digits), stray numbers
   const shlokaRaw = (v.shloka_text || '')
-    .replace(/।।[\d.]+।।/g,'')           // stamps with ASCII digits: ।।1.16.5।।
-    .replace(/।।[०-९.]+।।/g,'')          // stamps with Devanagari digits
+    .replace(/।।\s*[\d.]+\s*।।/g,'')           // stamps with ASCII digits: ।।1.16.5।। or ।। 1.16.5 ।।
+    .replace(/।।\s*[०-९.]+\s*।।/g,'')          // stamps with Devanagari digits (spaced or tight)
     .replace(/\|\|[\d.\s-]+\|\|/g,'')    // || N || format
     .replace(/\(\d+\)/g,'')              // (4) style references
     .replace(/\b\d{1,4}\b/g,'')          // stray ASCII numbers 1-4 digits
@@ -691,7 +691,7 @@ function renderVerse(){
 
   // IAST — same cleaning
   const iast = (v.transliteration || '')
-    .replace(/।।[\d.]+।।/g,'')
+    .replace(/।।\s*[\d.]+\s*।।/g,'')
     .replace(/\|\|[\d.\s-]+\|\|/g,'')
     .replace(/\(\d+\)/g,'')
     .replace(/\b\d{1,4}\b/g,'')
