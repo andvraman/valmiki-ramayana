@@ -508,7 +508,7 @@ function parseWordTable(raw){
     if(!t || t.length > 150) continue;
     // Pattern: "devaWord meaning text" or "devaWord: meaning"
     // The word is Devanagari chars + possible colon, followed by English meaning
-    const m = t.match(/^([\u0900-\u097F\u0964\u0965:*\s-]+?)\s+([a-zA-Z].{2,})$/);
+    const m = t.match(/^([\u0900-\u097F\u0964\u0965:*\s-]+?)\s+([a-zA-Z].*)$/);
     if(m){
       const w = m[1].replace(/[:*]/g,'').trim();
       const mg = m[2].trim();
