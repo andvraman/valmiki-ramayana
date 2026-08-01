@@ -707,8 +707,23 @@ function renderVerse(){
   // Sarga summary (comments field — same for all verses in sarga, show only on v1)
   const summary = curIdx === 0 && v.comments ? v.comments.trim() : '';
 
-  // Hindi entry from loaded JSON (null if file not yet available)
-  const hindiEntry = getHindi(v.shloka || (curIdx + 1));
+  // Hindi: prefer the migrated `hindi` field written onto the data.json row
+  // (stream C step 4); fall back to hindi_{kanda}_{sarga}.json where the field is
+  // absent. Combine-continuation rows carry the back-pointing notice as their
+  // `hindi` value (template "अनुवाद श्लोक …"). The Hindi sarga summary
+  // (`comments`) still comes from the JSON when present.
+  const jsonEntry = getHindi(v.shloka || (curIdx + 1));
+  let hindiEntry;
+  if(v.hindi != null){
+    const isNotice = typeof v.hindi === 'string' && v.hindi.startsWith('अनुवाद श्लोक ');
+    hindiEntry = {
+      comments: jsonEntry ? jsonEntry.comments : undefined,
+      hindi:  isNotice ? undefined : v.hindi,
+      notice: isNotice ? v.hindi : undefined
+    };
+  } else {
+    hindiEntry = jsonEntry;
+  }
 
   // Hindi-language sarga summary/disclaimer — mirrors the English `summary` above,
   // but sourced from hindi_{kanda}_{sarga}.json's own `comments` field (added for
