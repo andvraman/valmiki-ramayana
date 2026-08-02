@@ -440,14 +440,16 @@ header{flex-shrink:0;background:var(--bg-card);border-bottom:1px solid var(--gol
 /* ══════════════════════════════════════════════════
    KANDA METADATA
 ══════════════════════════════════════════════════ */
+// sargas/verses counts let the kanda screen render without loading any data_N.json.
+// Each kanda's rows are fetched lazily on first open (see ensureKanda).
 const KANDAS = [
-  {id:'Bala Kanda',      deva:'बालकाण्ड',        roman:'Bāla Kāṇḍa',       eng:'Book of Youth'      },
-  {id:'Ayodhya Kanda',   deva:'अयोध्याकाण्ड',    roman:'Ayodhyā Kāṇḍa',   eng:'Book of Ayodhyā'    },
-  {id:'Aranya Kanda',    deva:'अरण्यकाण्ड',      roman:'Araṇya Kāṇḍa',    eng:'Book of the Forest' },
-  {id:'Kishkindha Kanda',deva:'किष्किन्धाकाण्ड', roman:'Kiṣkindhā Kāṇḍa', eng:'Book of Kiṣkindhā'  },
-  {id:'Sundara Kanda',   deva:'सुन्दरकाण्ड',     roman:'Sundara Kāṇḍa',   eng:'Book of Beauty'     },
-  {id:'Yuddha Kanda',    deva:'युद्धकाण्ड',      roman:'Yuddha Kāṇḍa',    eng:'Book of War'        },
-  {id:'Uttara Kanda',    deva:'उत्तरकाण्ड',      roman:'Uttara Kāṇḍa',    eng:'Book of the Return' },
+  {id:'Bala Kanda',      deva:'बालकाण्ड',        roman:'Bāla Kāṇḍa',       eng:'Book of Youth',      sargas:77,  verses:2232},
+  {id:'Ayodhya Kanda',   deva:'अयोध्याकाण्ड',    roman:'Ayodhyā Kāṇḍa',   eng:'Book of Ayodhyā',    sargas:119, verses:4319},
+  {id:'Aranya Kanda',    deva:'अरण्यकाण्ड',      roman:'Araṇya Kāṇḍa',    eng:'Book of the Forest', sargas:76,  verses:2478},
+  {id:'Kishkindha Kanda',deva:'किष्किन्धाकाण्ड', roman:'Kiṣkindhā Kāṇḍa', eng:'Book of Kiṣkindhā',  sargas:67,  verses:2466},
+  {id:'Sundara Kanda',   deva:'सुन्दरकाण्ड',     roman:'Sundara Kāṇḍa',   eng:'Book of Beauty',     sargas:68,  verses:2826},
+  {id:'Yuddha Kanda',    deva:'युद्धकाण्ड',      roman:'Yuddha Kāṇḍa',    eng:'Book of War',        sargas:131, verses:5832},
+  {id:'Uttara Kanda',    deva:'उत्तरकाण्ड',      roman:'Uttara Kāṇḍa',    eng:'Book of the Return', sargas:111, verses:3575},
 ];
 
 const SARGA_NAMES = {
@@ -522,31 +524,22 @@ function parseWordTable(raw){
 /* ══════════════════════════════════════════════════
    LOAD DATA
 ══════════════════════════════════════════════════ */
-async function loadData(){
-  const bar = document.getElementById('lo-bar');
-  bar.style.width = '20%';
-
-  const resp = await fetch('data.json');
-  bar.style.width = '60%';
-
-  const raw = await resp.json();
-  bar.style.width = '85%';
-
-  // Index: DB[kanda][sarga] = [verses...]
-  for(const entry of raw){
-    const k = entry.kanda;
+// Fetch one kanda's rows on demand (data_{1..7}.json) and index them as
+// DB[kanda][sarga] = [verses…]. Cached after first load, so returning to a kanda
+// is instant. Row order within each sarga is preserved from the file.
+async function ensureKanda(id){
+  if(DB[id]) return;                        // already fetched
+  const n = kandalNum(id);
+  const resp = await fetch(`data_${n}.json`);
+  if(!resp.ok) throw new Error(`data_${n}.json (${resp.status})`);
+  const rows = await resp.json();
+  const idx = {};
+  for(const entry of rows){
     const s = entry.sarga;
-    if(!DB[k]) DB[k] = {};
-    if(!DB[k][s]) DB[k][s] = [];
-    DB[k][s].push(entry);
+    if(!idx[s]) idx[s] = [];
+    idx[s].push(entry);
   }
-
-  bar.style.width = '100%';
-  setTimeout(()=>{
-    document.getElementById('loading-overlay').style.display = 'none';
-    document.getElementById('app').style.display = 'flex';
-    init();
-  }, 300);
+  DB[id] = idx;
 }
 
 /* ══════════════════════════════════════════════════
@@ -555,8 +548,7 @@ async function loadData(){
 function buildKandaScreen(){
   const grid = document.getElementById('kanda-grid');
   grid.innerHTML = KANDAS.map(k => {
-    const sargas = DB[k.id] ? Object.keys(DB[k.id]).length : 0;
-    const verses = DB[k.id] ? Object.values(DB[k.id]).reduce((a,v)=>a+v.length,0) : 0;
+    const sargas = k.sargas, verses = k.verses;   // static manifest; no data load
     return `<div class="kanda-btn" onclick="selectKanda('${k.id}')">
       <span class="kb-deva">${k.deva}</span>
       <span class="kb-roman">${k.roman}</span>
@@ -576,15 +568,27 @@ function buildKandaScreen(){
   }
 }
 
-function selectKanda(id){
+async function selectKanda(id){
   curKanda = KANDAS.find(k => k.id === id);
-  const sargas = DB[id] ? Object.keys(DB[id]).map(Number).sort((a,b)=>a-b) : [];
-  const names = SARGA_NAMES[id] || [];
+  const list = document.getElementById('sarga-list');
 
   document.getElementById('sarga-kanda-title').textContent =
     `${curKanda.deva} — ${curKanda.roman} · ${curKanda.eng}`;
+  showScreen('sarga');
 
-  document.getElementById('sarga-list').innerHTML = sargas.map(s => {
+  if(!DB[id]){                              // first open — fetch this kanda's file
+    list.innerHTML = `<div style="padding:40px;text-align:center;font-family:var(--roman);color:var(--text-dim)">Loading ${curKanda.roman}…</div>`;
+    try{ await ensureKanda(id); }
+    catch(e){
+      list.innerHTML = `<div style="padding:40px;text-align:center;font-family:var(--roman);color:#c8973a">Could not load ${curKanda.roman}.<br><span style="font-size:0.8em;color:var(--text-dim)">${e.message}</span></div>`;
+      return;
+    }
+  }
+
+  const sargas = Object.keys(DB[id]).map(Number).sort((a,b)=>a-b);
+  const names = SARGA_NAMES[id] || [];
+
+  list.innerHTML = sargas.map(s => {
     const nm = names[s-1];
     const vcount = DB[id][s] ? DB[id][s].length : 0;
     return `<div class="sarga-item" onclick="selectSarga(${s})">
@@ -824,13 +828,13 @@ function savePos(){
   if(curKanda && curSarga)
     localStorage.setItem('vr_pos', JSON.stringify({kanda:curKanda.id, sarga:curSarga, verse:curIdx}));
 }
-function jumpToBookmark(){
+async function jumpToBookmark(){
   const bm = getBm(); if(!bm) return;
   const k = KANDAS.find(x => x.id===bm.kanda); if(!k) return;
   curKanda = k;
-  selectKanda(k.id);
-  // slight delay so sarga screen renders, then jump straight to verse
-  setTimeout(()=>{ selectSarga(bm.sarga); setTimeout(()=>{ curIdx=bm.verse||0; renderVerse(); },50); },50);
+  await selectKanda(k.id);          // awaits the kanda fetch before jumping
+  selectSarga(bm.sarga);
+  setTimeout(()=>{ curIdx=bm.verse||0; renderVerse(); },50);
 }
 
 /* ══════════════════════════════════════════════════
@@ -967,17 +971,20 @@ function init(){
   showScreen('kanda');
 }
 
-// Start
-loadData().catch(err => {
+// Start — no whole-corpus fetch. The kanda screen renders from the static
+// manifest immediately; each kanda's data_{n}.json loads on first open.
+try {
+  document.getElementById('loading-overlay').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  init();
+} catch(err){
+  document.getElementById('loading-overlay').style.display = 'flex';
   document.getElementById('loading-overlay').innerHTML =
     `<div style="padding:30px;text-align:center;font-family:Georgia,serif;color:#c8973a;max-width:300px">
-      <div style="font-size:1.1rem;margin-bottom:12px">Could not load data.json</div>
-      <div style="font-size:0.8rem;color:#9a8060;line-height:1.6">
-        Make sure data.json is in the same folder as index.html in your GitHub repository.<br><br>
-        Error: ${err.message}
-      </div>
+      <div style="font-size:1.1rem;margin-bottom:12px">Could not start the app</div>
+      <div style="font-size:0.8rem;color:#9a8060;line-height:1.6">Error: ${err.message}</div>
     </div>`;
-});
+}
 </script>
 </body>
 </html>
