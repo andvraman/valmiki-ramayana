@@ -56,11 +56,6 @@ header{flex-shrink:0;background:var(--bg-card);border-bottom:1px solid var(--gol
 .bm-jump{margin-top:18px;background:var(--bg-card2);border:1px solid var(--saffron);border-radius:8px;padding:12px 16px;cursor:pointer;font-family:var(--deva);font-size:0.82rem;color:var(--saffron);text-align:center;-webkit-tap-highlight-color:transparent;display:none;line-height:1.5;}
 
 /* Loading overlay */
-#loading-overlay{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:16px;}
-#loading-overlay .lo-title{font-family:var(--deva);font-size:1.3rem;color:var(--gold);}
-#loading-overlay .lo-sub{font-family:var(--roman);font-size:0.8rem;color:var(--text-dim);font-style:italic;}
-#loading-overlay .lo-bar-wrap{width:200px;height:4px;background:var(--gold-dim);border-radius:2px;overflow:hidden;}
-#loading-overlay .lo-bar{height:100%;width:0%;background:var(--gold);border-radius:2px;transition:width 0.3s;}
 
 /* ── Sarga screen ── */
 .back-bar{flex-shrink:0;background:var(--bg-card2);border-bottom:1px solid var(--gold-dim);padding:9px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
@@ -299,14 +294,7 @@ header{flex-shrink:0;background:var(--bg-card);border-bottom:1px solid var(--gol
 </head>
 <body class="mode-hindi">
 
-<!-- Loading overlay — shown while data.json loads -->
-<div id="loading-overlay">
-  <div class="lo-title">॥ वाल्मीकि रामायण ॥</div>
-  <div class="lo-sub">Loading scripture…</div>
-  <div class="lo-bar-wrap"><div class="lo-bar" id="lo-bar"></div></div>
-</div>
-
-<div id="app" style="display:none">
+<div id="app">
 
 <header>
   <div class="h-title">
@@ -974,13 +962,10 @@ function init(){
 // Start — no whole-corpus fetch. The kanda screen renders from the static
 // manifest immediately; each kanda's data_{n}.json loads on first open.
 try {
-  document.getElementById('loading-overlay').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
   init();
 } catch(err){
-  document.getElementById('loading-overlay').style.display = 'flex';
-  document.getElementById('loading-overlay').innerHTML =
-    `<div style="padding:30px;text-align:center;font-family:Georgia,serif;color:#c8973a;max-width:300px">
+  document.body.innerHTML =
+    `<div style="padding:40px;text-align:center;font-family:Georgia,serif;color:#c8973a">
       <div style="font-size:1.1rem;margin-bottom:12px">Could not start the app</div>
       <div style="font-size:0.8rem;color:#9a8060;line-height:1.6">Error: ${err.message}</div>
     </div>`;
