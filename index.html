@@ -491,18 +491,24 @@ function showScreen(name){
 function parseWordTable(raw){
   if(!raw) return [];
   const words = [];
+  // Zero-width characters (BOM etc.) are scattered through the inherited
+  // glosses and break the match; strip them before anything else.
+  raw = raw.replace(/[\uFEFF\u200B-\u200D]/g, '');
   // Split on comma, but be careful not to split mid-meaning
   const parts = raw.split(/,\s*/);
   for(const part of parts){
     const t = part.trim();
     if(!t || t.length > 150) continue;
-    // Pattern: "devaWord meaning text" or "devaWord: meaning"
-    // The word is Devanagari chars + possible colon, followed by English meaning
-    const m = t.match(/^([\u0900-\u097F\u0964\u0965:*\s-]+?)\s+([a-zA-Z].*)$/);
+    // Pattern: "devaWord meaning text" or "devaWord: meaning".
+    // Devanagari side may carry brackets or quotes; the English side may open
+    // with a quote, bracket or digit as well as a letter.
+    const m = t.match(/^([\u0900-\u097F\u0964\u0965:*()\[\]"\u201C\u201D'\u2018\u2019\s-]+?)\s+([a-zA-Z0-9"\u201C'\u2018(\[].*)$/);
     if(m){
-      const w = m[1].replace(/[:*]/g,'').trim();
+      const w = m[1].replace(/[:*()\[\]"\u201C\u201D'\u2018\u2019]/g,'').trim();
       const mg = m[2].trim();
-      if(w && mg && w.length >= 2 && w.length < 60)
+      // Minimum of one character: single-syllable words with a visarga
+      // (क:, स:) reduce to one character once the colon is stripped.
+      if(w && mg && w.length >= 1 && w.length < 60)
         words.push({deva: w, meaning: mg});
     }
   }
