@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="sa" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="रामायण">
+<title>वाल्मीकि रामायण</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@300;400;500;600&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#FDF6E3; --bg-alt:#F5EDD0; --ink:#1A1208; --ink-mid:#5C4A2A;
+  --ink-soft:#9A7B4F; --saffron:#C8720A; --saffron-lt:#F5DEB3;
+  --divider:#D9C99A; --font-dev:'Noto Sans Devanagari',sans-serif;
+  --font-lat:'Crimson Pro',Georgia,serif;
+  --fs-xl:2rem; --fs-md:1.15rem; --fs-sm:0.9rem; --fs-xs:0.78rem;
+  --radius:12px; --tr:0.25s ease;
+}
+[data-theme="dark"] {
+  --bg:#0D0F1A; --bg-alt:#161824; --ink:#F0E6C8; --ink-mid:#C4AA7E;
+  --ink-soft:#7A6A50; --saffron:#E8890C; --saffron-lt:#2A2010; --divider:#2E2A1E;
+}
+[data-fontsize="small"]  { --fs-xl:1.55rem; --fs-md:1rem;    --fs-sm:0.85rem; }
+[data-fontsize="medium"] { --fs-xl:2rem;    --fs-md:1.15rem; --fs-sm:0.9rem;  }
+[data-fontsize="large"]  { --fs-xl:2.5rem;  --fs-md:1.35rem; --fs-sm:1rem;    }
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-lat);
+  transition:background var(--tr),color var(--tr);-webkit-font-smoothing:antialiased}
+
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;
+  max-width:480px;margin:0 auto;overflow:hidden;position:relative}
+
+/* HEADER */
+#header{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px 10px;border-bottom:1px solid var(--divider);
+  background:var(--bg);flex-shrink:0;gap:8px;transition:background var(--tr)}
+#kanda-label{font-family:var(--font-dev);font-size:0.82rem;color:var(--ink-mid);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#header-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+#shloka-counter{font-family:var(--font-lat);font-size:var(--fs-sm);color:var(--ink-soft)}
+.icon-btn{background:none;border:none;cursor:pointer;color:var(--ink-mid);
+  font-size:1.1rem;padding:4px 6px;border-radius:6px;line-height:1;transition:color var(--tr)}
+.icon-btn:hover{color:var(--saffron)}
+
+/* PROGRESS */
+#progress-bar{height:2px;background:var(--saffron);width:20%;
+  transition:width 0.3s ease;flex-shrink:0}
+
+/* LANG TABS */
+#lang-bar{display:flex;border-bottom:1px solid var(--divider);flex-shrink:0;
+  background:var(--bg);transition:background var(--tr)}
+.lang-tab{flex:1;padding:9px 0;background:none;border:none;
+  border-bottom:2px solid transparent;font-family:var(--font-lat);
+  font-size:var(--fs-sm);color:var(--ink-soft);cursor:pointer;
+  transition:color var(--tr),border-color var(--tr);letter-spacing:0.04em}
+.lang-tab.active{color:var(--saffron);border-bottom-color:var(--saffron);font-weight:600}
+
+/* READER */
+#reader{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 22px;
+  -webkit-overflow-scrolling:touch;position:relative}
+#watermark{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);
+  font-family:var(--font-dev);font-size:13rem;font-weight:600;color:var(--saffron);
+  opacity:0.04;pointer-events:none;user-select:none;line-height:1}
+#sarga-label{text-align:center;padding:20px 0 6px;font-family:var(--font-dev);
+  font-size:var(--fs-xs);color:var(--ink-soft);letter-spacing:0.08em;
+  position:relative;z-index:1}
+
+/* Sanskrit */
+#sanskrit-block{position:relative;z-index:1;text-align:center;padding:20px 0 18px}
+#sanskrit-text{font-family:var(--font-dev);font-size:var(--fs-xl);font-weight:400;
+  line-height:1.95;color:var(--ink);letter-spacing:0.01em}
+#roman-text{font-family:var(--font-lat);font-size:var(--fs-sm);font-style:italic;
+  color:var(--ink-soft);margin-top:10px;line-height:1.7;display:none}
+#roman-text.visible{display:block}
+
+.verse-divider{width:50px;height:1px;background:var(--divider);
+  margin:0 auto 18px;position:relative;z-index:1}
+
+/* Translation */
+#trans-block{position:relative;z-index:1;padding:0 2px 18px}
+#trans-label{font-family:var(--font-lat);font-size:var(--fs-xs);color:var(--ink-soft);
+  letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px}
+#trans-text{font-family:var(--font-dev);font-size:var(--fs-md);line-height:1.95;
+  color:var(--ink-mid);font-weight:300;min-height:4em}
+#trans-text.lang-en{font-family:var(--font-lat);font-size:calc(var(--fs-md)*1.05);
+  line-height:1.8;font-style:italic;font-weight:300}
+
+/* WBW */
+#wbw-toggle{width:100%;background:var(--bg-alt);border:1px solid var(--divider);
+  border-radius:var(--radius);padding:13px 16px;margin:2px 0 18px;cursor:pointer;
+  display:flex;justify-content:space-between;align-items:center;
+  font-family:var(--font-dev);font-size:0.92rem;color:var(--ink-mid);
+  transition:border-color var(--tr),background var(--tr);position:relative;z-index:1}
+#wbw-toggle:hover{border-color:var(--saffron)}
+#wbw-arrow{transition:transform 0.2s;font-style:normal}
+#wbw-arrow.open{transform:rotate(180deg)}
+#wbw-panel{background:var(--bg-alt);border:1px solid var(--divider);
+  border-radius:var(--radius);padding:0 16px;margin:-12px 0 20px;overflow:hidden;
+  max-height:0;transition:max-height 0.35s ease,padding var(--tr);
+  position:relative;z-index:1}
+#wbw-panel.open{max-height:600px;padding:12px 16px 16px}
+.wbw-note{font-family:var(--font-lat);font-size:var(--fs-xs);font-style:italic;
+  color:var(--ink-soft);margin-bottom:10px;padding-bottom:8px;
+  border-bottom:1px solid var(--divider)}
+.wbw-row{display:flex;align-items:baseline;gap:10px;padding:6px 0;
+  border-bottom:1px solid var(--divider)}
+.wbw-row:last-child{border-bottom:none}
+.wbw-sk{font-family:var(--font-dev);font-size:1rem;color:var(--ink);
+  min-width:130px;font-weight:500}
+.wbw-sep{color:var(--saffron);font-size:0.8rem;flex-shrink:0}
+.wbw-mn{font-family:var(--font-lat);font-size:var(--fs-sm);color:var(--ink-mid);font-style:italic}
+
+/* FOOTER */
+#footer{padding:12px 20px 16px;border-top:1px solid var(--divider);background:var(--bg);
+  flex-shrink:0;transition:background var(--tr)}
+#nav-row{display:flex;gap:10px;margin-bottom:10px}
+.nav-btn{flex:1;background:none;border:1px solid var(--divider);border-radius:8px;
+  padding:10px 0;font-family:var(--font-lat);font-size:var(--fs-md);color:var(--saffron);
+  cursor:pointer;transition:background var(--tr),border-color var(--tr)}
+.nav-btn:hover:not(:disabled){background:var(--saffron-lt);border-color:var(--saffron)}
+.nav-btn:disabled{color:var(--ink-soft);opacity:0.35;cursor:not-allowed}
+#bookmark-btn{width:100%;background:none;border:1px solid var(--divider);
+  border-radius:8px;padding:9px 0;font-family:var(--font-lat);font-size:var(--fs-sm);
+  color:var(--ink-mid);cursor:pointer;display:flex;align-items:center;
+  justify-content:center;gap:6px;transition:background var(--tr),color var(--tr),border-color var(--tr)}
+#bookmark-btn.saved{background:var(--saffron-lt);border-color:var(--saffron);color:var(--saffron)}
+
+/* SETTINGS */
+#settings-panel{position:absolute;inset:0;background:var(--bg);z-index:100;
+  display:none;flex-direction:column;padding:22px 20px;overflow-y:auto;
+  transition:background var(--tr)}
+#settings-panel.open{display:flex}
+#settings-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px}
+#settings-title{font-family:var(--font-dev);font-size:1.25rem;color:var(--ink)}
+.s-label{font-family:var(--font-lat);font-size:var(--fs-xs);letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px}
+.s-section{margin-bottom:24px}
+.toggle-row{display:flex;gap:8px}
+.tog{flex:1;padding:10px 0;border:1px solid var(--divider);border-radius:8px;
+  background:none;font-family:var(--font-lat);font-size:var(--fs-sm);
+  color:var(--ink-mid);cursor:pointer;transition:all var(--tr);text-align:center}
+.tog.active{border-color:var(--saffron);background:var(--saffron-lt);color:var(--saffron)}
+.attribution{margin-top:auto;padding-top:20px;border-top:1px solid var(--divider);
+  font-family:var(--font-lat);font-size:var(--fs-xs);color:var(--ink-soft);line-height:1.8}
+.attribution a{color:var(--saffron);text-decoration:none}
+
+/* TOAST */
+#toast{position:absolute;bottom:88px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:var(--bg);font-family:var(--font-lat);
+  font-size:var(--fs-xs);padding:8px 18px;border-radius:20px;opacity:0;
+  transition:opacity 0.3s;pointer-events:none;white-space:nowrap;z-index:200}
+#toast.show{opacity:1}
+
+.fade-out{animation:fo 0.17s ease forwards}
+.fade-in {animation:fi 0.17s ease forwards}
+@keyframes fo{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-18px)}}
+@keyframes fi {from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+</style>
+</head>
+<body>
+<div id="app" data-theme="light" data-fontsize="medium">
+
+  <div id="header">
+    <span id="kanda-label">बालकाण्ड · सर्ग १</span>
+    <div id="header-right">
+      <span id="shloka-counter">1 / 5</span>
+      <button class="icon-btn" onclick="openSettings()">⚙</button>
+    </div>
+  </div>
+
+  <div id="progress-bar"></div>
+
+  <div id="lang-bar">
+    <button class="lang-tab active" id="tab-hi" onclick="setLang('hi')">हिंदी</button>
+    <button class="lang-tab"        id="tab-en" onclick="setLang('en')">English</button>
+  </div>
+
+  <div id="reader">
+    <div id="watermark">१</div>
+    <div id="sarga-label">बालकाण्ड · सर्ग १ · श्लोक १</div>
+    <div id="sanskrit-block">
+      <div id="sanskrit-text"></div>
+      <div id="roman-text"></div>
+    </div>
+    <div class="verse-divider"></div>
+    <div id="trans-block">
+      <div id="trans-label">हिंदी अर्थ</div>
+      <div id="trans-text"></div>
+    </div>
+    <button id="wbw-toggle" onclick="toggleWBW()">
+      <span>शब्द-अर्थ &nbsp;·&nbsp; Word by Word</span>
+      <em id="wbw-arrow">▾</em>
+    </button>
+    <div id="wbw-panel">
+      <div class="wbw-note">Word meanings in English · Source: ramayana.info</div>
+      <div id="wbw-content"></div>
+    </div>
+  </div>
+
+  <div id="footer">
+    <div id="nav-row">
+      <button class="nav-btn" id="prev-btn" onclick="navigate(-1)">◀ पूर्व</button>
+      <button class="nav-btn" id="next-btn" onclick="navigate(1)">अगला ▶</button>
+    </div>
+    <button id="bookmark-btn" onclick="toggleBookmark()">
+      <span>🔖</span><span id="bm-label">Save Position · स्थान सुरक्षित करें</span>
+    </button>
+  </div>
+
+  <div id="settings-panel">
+    <div id="settings-header">
+      <span id="settings-title">सेटिंग्स · Settings</span>
+      <button class="icon-btn" style="font-size:1.3rem" onclick="closeSettings()">✕</button>
+    </div>
+    <div class="s-section">
+      <div class="s-label">Translation Language · अनुवाद भाषा</div>
+      <div class="toggle-row">
+        <button class="tog active" id="slang-hi" onclick="setLang('hi');closeSettings()">हिंदी</button>
+        <button class="tog"        id="slang-en" onclick="setLang('en');closeSettings()">English</button>
+      </div>
+    </div>
+    <div class="s-section">
+      <div class="s-label">Theme · थीम</div>
+      <div class="toggle-row">
+        <button class="tog active" id="theme-light" onclick="setTheme('light')">☀ Light</button>
+        <button class="tog"        id="theme-dark"  onclick="setTheme('dark')">☽ Dark</button>
+      </div>
+    </div>
+    <div class="s-section">
+      <div class="s-label">Font Size · अक्षर आकार</div>
+      <div class="toggle-row">
+        <button class="tog"        id="size-small"  onclick="setSize('small')">अ Small</button>
+        <button class="tog active" id="size-medium" onclick="setSize('medium')">अ Med</button>
+        <button class="tog"        id="size-large"  onclick="setSize('large')">अ Large</button>
+      </div>
+    </div>
+    <div class="s-section">
+      <div class="s-label">Romanisation · रोमन लिपि</div>
+      <div class="toggle-row">
+        <button class="tog active" id="roman-off" onclick="setRoman(false)">Off</button>
+        <button class="tog"        id="roman-on"  onclick="setRoman(true)">On</button>
+      </div>
+    </div>
+    <div class="attribution">
+      <strong>Sanskrit text:</strong> GRETIL, Göttingen University<br>
+      <a href="https://gretil.sub.uni-goettingen.de" target="_blank">gretil.sub.uni-goettingen.de</a> · CC BY-NC-SA 4.0<br><br>
+      <strong>Translations &amp; word meanings:</strong><br>
+      <a href="https://ramayana.info" target="_blank">ramayana.info</a> · Fetched live<br><br>
+      Personal use only · Not for commercial distribution
+    </div>
+  </div>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+const DATA = [
+  { n:1, nd:"१",
+    sa:"तपः स्वाध्यायनिरतं तपस्विनं वाग्विदां वरम् ।\nनारदं परिपप्रच्छ वाल्मीकिर्मुनिपुङ्गवम् ॥",
+    ro:"tapaḥ svādhyāya-nirataṃ tapasvinaṃ vāgvidāṃ varam |\nnāradaṃ paripapraccha vālmīkir munipuṅgavam ||",
+    hi:"तपस्या और स्वाध्याय में निरत, तपस्वी, वाणी के ज्ञाताओं में श्रेष्ठ मुनिराज नारद जी से मुनिश्रेष्ठ वाल्मीकि ने प्रश्न किया।",
+    en:"Valmiki, foremost among sages, questioned Narada — devoted to penance and study, an ascetic, best among those who know the power of speech.",
+    wbw:[{s:"तपः",m:"penance, ascetic practice"},{s:"स्वाध्यायनिरतम्",m:"devoted to self-study of the Vedas"},{s:"तपस्विनम्",m:"the ascetic"},{s:"वाग्विदाम्",m:"among those who know speech"},{s:"वरम्",m:"the foremost, the best"},{s:"नारदम्",m:"Narada (the divine sage)"},{s:"परिपप्रच्छ",m:"asked, enquired"},{s:"वाल्मीकिः",m:"the sage Valmiki"},{s:"मुनिपुङ्गवम्",m:"foremost among sages"}]
+  },
+  { n:2, nd:"२",
+    sa:"को न्वस्मिन् साम्प्रतं लोके गुणवान् कश्च वीर्यवान् ।\nधर्मज्ञश्च कृतज्ञश्च सत्यवाक्यो दृढव्रतः ॥",
+    ro:"ko nvasmin sāmpratam loke guṇavān kaśca vīryavān |\ndharma-jñaśca kṛta-jñaśca satya-vākyo dṛḍha-vrataḥ ||",
+    hi:"इस समय इस संसार में कौन ऐसा है जो गुणवान् है, वीर्यवान् है, धर्मज्ञ है, कृतज्ञ है, सत्यवादी है और दृढ़-प्रतिज्ञ है?",
+    en:"Who in this world today is truly virtuous? Who is valiant? Who knows righteousness, is grateful, speaks only truth, and is firm in his vows?",
+    wbw:[{s:"कः",m:"who"},{s:"नु",m:"indeed, pray tell"},{s:"अस्मिन्",m:"in this"},{s:"साम्प्रतम्",m:"at this time, now"},{s:"लोके",m:"in the world"},{s:"गुणवान्",m:"possessed of virtues"},{s:"वीर्यवान्",m:"possessed of valour"},{s:"धर्मज्ञः",m:"knower of righteousness"},{s:"कृतज्ञः",m:"grateful, remembers good done"},{s:"सत्यवाक्यः",m:"whose speech is always true"},{s:"दृढव्रतः",m:"firm in his vows"}]
+  },
+  { n:3, nd:"३",
+    sa:"चारित्रेण च को युक्तः सर्वभूतेषु को हितः ।\nविद्वान् कः कः समर्थश्च कश्चैकप्रियदर्शनः ॥",
+    ro:"cāritreṇa ca ko yuktaḥ sarvabhūteṣu ko hitaḥ |\nvidvān kaḥ kaḥ samarthaśca kaścaika-priya-darśanaḥ ||",
+    hi:"चरित्र से कौन सम्पन्न है? सभी प्राणियों के लिए कौन हितकारी है? विद्वान् कौन है? समर्थ कौन है? और किसका दर्शन प्रिय लगता है?",
+    en:"Who is endowed with noble character? Who is a well-wisher of all living beings? Who is learned? Who is capable? And whose very sight is pleasing to behold?",
+    wbw:[{s:"चारित्रेण",m:"in character, in conduct"},{s:"युक्तः",m:"endowed with, possessed of"},{s:"सर्वभूतेषु",m:"towards all living beings"},{s:"हितः",m:"beneficial, a well-wisher"},{s:"विद्वान्",m:"learned, wise"},{s:"समर्थः",m:"capable, able"},{s:"प्रियदर्शनः",m:"pleasing to behold"}]
+  },
+  { n:4, nd:"४",
+    sa:"आत्मवान् को जितक्रोधो द्युतिमान् कोऽनसूयकः ।\nकस्य बिभ्यति देवाश्च जातरोषस्य संयुगे ॥",
+    ro:"ātmavān ko jita-krodho dyutimān ko'nasūyakaḥ |\nkasya bibhyati devāśca jāta-roṣasya saṃyuge ||",
+    hi:"कौन आत्मज्ञानी है, क्रोध को जीतने वाला है, तेजस्वी है और ईर्ष्या-रहित है? युद्ध में क्रोधित होने पर किससे देवता भी डरते हैं?",
+    en:"Who is self-possessed, who has conquered anger, who is radiant, free from envy? Even the gods — when that person's wrath is kindled in battle — of whom are they afraid?",
+    wbw:[{s:"आत्मवान्",m:"self-possessed, wise about the self"},{s:"जितक्रोधः",m:"who has conquered anger"},{s:"द्युतिमान्",m:"resplendent, radiant"},{s:"अनसूयकः",m:"free from jealousy and envy"},{s:"कस्य",m:"of whom"},{s:"बिभ्यति",m:"are afraid"},{s:"देवाः",m:"the gods"},{s:"जातरोषस्य",m:"when his anger is aroused"},{s:"संयुगे",m:"in battle"}]
+  },
+  { n:5, nd:"५",
+    sa:"एतदिच्छाम्यहं श्रोतुं परं कौतूहलं हि मे ।\nमहर्षे त्वं समर्थोऽसि ज्ञातुमेवंविधं नरम् ॥",
+    ro:"etad icchāmy ahaṃ śrotuṃ paraṃ kautūhalaṃ hi me |\nmaharṣe tvaṃ samartho'si jñātum evaṃ-vidhaṃ naram ||",
+    hi:"हे महर्षि! मैं यही सुनना चाहता हूँ, मुझे बड़ी जिज्ञासा है। आप ही ऐसे पुरुष को जानने में समर्थ हैं।",
+    en:"O great sage, I wish to hear of such a person — my curiosity is immense. You alone are capable of knowing a man of this kind.",
+    wbw:[{s:"एतत्",m:"this"},{s:"इच्छामि",m:"I wish, I desire"},{s:"अहम्",m:"I"},{s:"श्रोतुम्",m:"to hear"},{s:"परम्",m:"great, intense"},{s:"कौतूहलम्",m:"curiosity, eagerness to know"},{s:"महर्षे",m:"O great sage (vocative)"},{s:"त्वम्",m:"you"},{s:"समर्थः",m:"capable, able"},{s:"ज्ञातुम्",m:"to know, to identify"},{s:"नरम्",m:"the man, the person"}]
+  }
+];
+
+let cur=0, lang='hi', wbwOpen=false, showRoman=false, bmIdx=null;
+
+function init() {
+  lang      = localStorage.getItem('lang')     || 'hi';
+  const th  = localStorage.getItem('theme')    || 'light';
+  const sz  = localStorage.getItem('fontSize') || 'medium';
+  showRoman = localStorage.getItem('roman')    === 'true';
+  const bm  = localStorage.getItem('bookmark');
+  if (bm !== null) { bmIdx = parseInt(bm); cur = bmIdx; }
+  setTheme(th,true); setSize(sz,true); setRoman(showRoman,true);
+  _langUI(); paint();
+}
+
+function paint(dir) {
+  const s = DATA[cur];
+  const r = document.getElementById('reader');
+  if (dir) {
+    r.classList.add('fade-out');
+    setTimeout(()=>{ r.classList.remove('fade-out'); _doPaint(s);
+      r.classList.add('fade-in'); setTimeout(()=>r.classList.remove('fade-in'),180); },160);
+  } else { _doPaint(s); }
+}
+
+function _doPaint(s) {
+  document.getElementById('watermark').textContent = s.nd;
+  document.getElementById('sarga-label').textContent = 'बालकाण्ड · सर्ग १ · श्लोक ' + s.nd;
+  document.getElementById('shloka-counter').textContent = s.n + ' / ' + DATA.length;
+  document.getElementById('sanskrit-text').innerHTML = s.sa.replace(/\n/g,'<br>');
+  document.getElementById('roman-text').innerHTML    = s.ro.replace(/\n/g,'<br>');
+  document.getElementById('trans-label').textContent = lang==='hi' ? 'हिंदी अर्थ' : 'English Translation';
+  const td = document.getElementById('trans-text');
+  td.textContent  = lang==='hi' ? s.hi : s.en;
+  td.className    = lang==='en' ? 'lang-en' : '';
+  document.getElementById('progress-bar').style.width = ((cur+1)/DATA.length*100)+'%';
+  document.getElementById('prev-btn').disabled = cur===0;
+  document.getElementById('next-btn').disabled = cur===DATA.length-1;
+  document.getElementById('reader').scrollTop = 0;
+  if (wbwOpen){ wbwOpen=false;
+    document.getElementById('wbw-panel').classList.remove('open');
+    document.getElementById('wbw-arrow').classList.remove('open'); }
+  _bmUI();
+}
+
+function navigate(d){ const n=cur+d; if(n<0||n>=DATA.length)return; cur=n; paint(d); }
+
+function setLang(l){ lang=l; localStorage.setItem('lang',l); _langUI(); _doPaint(DATA[cur]); }
+function _langUI(){
+  document.getElementById('tab-hi').classList.toggle('active',lang==='hi');
+  document.getElementById('tab-en').classList.toggle('active',lang==='en');
+  document.getElementById('slang-hi').classList.toggle('active',lang==='hi');
+  document.getElementById('slang-en').classList.toggle('active',lang==='en');
+}
+
+function toggleWBW(){
+  wbwOpen=!wbwOpen;
+  document.getElementById('wbw-panel').classList.toggle('open',wbwOpen);
+  document.getElementById('wbw-arrow').classList.toggle('open',wbwOpen);
+  if(wbwOpen){
+    document.getElementById('wbw-content').innerHTML =
+      DATA[cur].wbw.map(w=>`<div class="wbw-row">
+        <span class="wbw-sk">${w.s}</span>
+        <span class="wbw-sep">→</span>
+        <span class="wbw-mn">${w.m}</span></div>`).join('');
+  }
+}
+
+function toggleBookmark(){
+  if(bmIdx===cur){ bmIdx=null; localStorage.removeItem('bookmark'); showToast('Bookmark removed'); }
+  else { bmIdx=cur; localStorage.setItem('bookmark',cur); showToast('Position saved · स्थान सुरक्षित'); }
+  _bmUI();
+}
+function _bmUI(){
+  const saved=bmIdx===cur;
+  document.getElementById('bookmark-btn').classList.toggle('saved',saved);
+  document.getElementById('bm-label').textContent = saved
+    ? 'Saved · सुरक्षित ✓'
+    : 'Save Position · स्थान सुरक्षित करें';
+}
+
+function openSettings() { document.getElementById('settings-panel').classList.add('open'); }
+function closeSettings(){ document.getElementById('settings-panel').classList.remove('open'); }
+
+function setTheme(t,init){
+  document.getElementById('app').setAttribute('data-theme',t);
+  document.getElementById('theme-light').classList.toggle('active',t==='light');
+  document.getElementById('theme-dark').classList.toggle('active',t==='dark');
+  if(!init) localStorage.setItem('theme',t);
+}
+function setSize(s,init){
+  document.getElementById('app').setAttribute('data-fontsize',s);
+  ['small','medium','large'].forEach(x=>
+    document.getElementById('size-'+x).classList.toggle('active',x===s));
+  if(!init) localStorage.setItem('fontSize',s);
+}
+function setRoman(on,init){
+  showRoman=on;
+  document.getElementById('roman-text').classList.toggle('visible',on);
+  document.getElementById('roman-on').classList.toggle('active',on);
+  document.getElementById('roman-off').classList.toggle('active',!on);
+  if(!init) localStorage.setItem('roman',on);
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+let tx=0;
+const rd=document.getElementById('reader');
+rd.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+rd.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>55) navigate(dx<0?1:-1);
+},{passive:true});
+
+init();
+</script>
+</body>
+</html>

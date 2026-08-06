@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Stamp Gap Finder — Ramayana Hindi Editor Helper</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<style>
+:root{
+  --bg:#1a1208;--bg-card:#231a0d;--bg-card2:#2a2010;
+  --gold:#c8973a;--gold-dim:#5a3f10;--saffron:#e8720c;
+  --text:#ede0c8;--text-dim:#9a8060;
+  --ok:#4a9a5a;--warn:#e8720c;--bad:#d64545;
+  --deva:'Noto Sans Devanagari','Nirmala UI','Mangal',sans-serif;
+  --ui:-apple-system,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--ui);height:100vh;display:flex;flex-direction:column;}
+header{padding:12px 18px;border-bottom:1px solid var(--gold-dim);background:var(--bg-card);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+h1{font-size:1rem;color:var(--gold);margin:0;font-weight:700;}
+.sub{font-size:0.72rem;color:var(--text-dim);}
+.toolbar{padding:8px 18px;background:var(--bg-card2);border-bottom:1px solid var(--gold-dim);display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+button{background:var(--bg-card);border:1px solid var(--gold-dim);color:var(--text);border-radius:6px;padding:6px 12px;font-size:0.78rem;cursor:pointer;font-family:var(--ui);}
+button:hover{border-color:var(--gold);}
+button.primary{background:var(--saffron);border-color:var(--saffron);color:#fff;font-weight:600;}
+button.small{padding:3px 8px;font-size:0.7rem;}
+button:disabled{opacity:.35;cursor:default;}
+input[type=file]{font-size:0.75rem;color:var(--text-dim);}
+select,input[type=number]{background:var(--bg);border:1px solid var(--gold-dim);color:var(--text);border-radius:5px;padding:4px 6px;font-size:0.75rem;}
+#stats{padding:6px 18px;font-size:0.72rem;color:var(--text-dim);background:var(--bg);border-bottom:1px solid var(--gold-dim);display:flex;gap:16px;flex-wrap:wrap;}
+#stats b{color:var(--gold);}
+
+#current-issue-bar{padding:8px 18px;font-size:0.76rem;color:var(--text);background:var(--bg-card2);
+  border-bottom:3px solid var(--gold-dim);display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+#current-issue-bar.gap{border-bottom-color:var(--bad);}
+#current-issue-bar.mismatch{border-bottom-color:#d64545;}
+#current-issue-bar.duplicate{border-bottom-color:#b03fd6;}
+#current-issue-bar.warning{border-bottom-color:#8a8;}
+#current-issue-bar.missing{border-bottom-color:var(--saffron);}
+#issue-info{flex:1;line-height:1.5;}
+#issue-info b{color:var(--gold);}
+
+#main{flex:1;display:flex;min-height:0;}
+#editor-pane{flex:1;display:flex;flex-direction:column;min-width:0;}
+#editor-cm{flex:1;min-height:0;}
+.CodeMirror{height:100%;background:#12100a;color:var(--text);
+  font-family:var(--deva);font-size:15px;line-height:1.7;}
+.CodeMirror-gutters{background:var(--bg-card);border-right:1px solid var(--gold-dim);}
+.CodeMirror-linenumber{color:var(--text-dim);font-family:var(--ui);font-size:0.75rem;}
+.CodeMirror-cursor{border-left:1.5px solid var(--gold);}
+.CodeMirror-selected{background:rgba(232,114,12,0.35)!important;}
+.CodeMirror-focused .CodeMirror-selected{background:rgba(232,114,12,0.4)!important;}
+.cm-issue-highlight{background:rgba(232,114,12,0.5);}
+
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--saffron);color:#fff;
+  padding:8px 16px;border-radius:18px;font-size:0.78rem;display:none;z-index:50;}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Stamp Gap Finder</h1>
+    <div class="sub">Finds missing {s}/{h} verse markers in multi-sarga Hindi translation files — jump &amp; fix instead of scanning line by line</div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <input type="file" id="file-input" accept=".txt">
+  <button id="btn-scan" class="primary">Scan document</button>
+  <button id="btn-prev-issue" disabled>◀ Prev issue</button>
+  <button id="btn-next-issue" disabled>Next issue ▶</button>
+  <span style="flex:1"></span>
+  <label style="font-size:0.72rem;color:var(--text-dim)">Go to sarga:
+    <select id="sarga-jump"><option>—</option></select>
+  </label>
+  <button id="btn-download">Download .txt</button>
+</div>
+
+<div id="stats">Load a file and click <b>Scan document</b> to begin.</div>
+
+<div id="current-issue-bar">
+  <span id="issue-info">No scan yet.</span>
+</div>
+
+<div id="main">
+  <div id="editor-pane">
+    <div id="editor-cm"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════
+   EDITOR — CodeMirror instead of a plain <textarea>.
+   A textarea re-lays-out its entire contents on every keystroke; for a
+   ~7000-line Devanagari file that causes real typing lag. CodeMirror only
+   renders the lines currently on screen, so performance stays flat
+   regardless of document size.
+══════════════════════════════════════════════ */
+const cm = CodeMirror(document.getElementById('editor-cm'), {
+  value: '',
+  lineNumbers: true,
+  lineWrapping: true,
+  viewportMargin: 10
+});
+function getEditorValue(){ return cm.getValue(); }
+function setEditorValue(text){ cm.setValue(text); }
+function jumpEditorTo(start, end){
+  const from = cm.posFromIndex(start);
+  const to = cm.posFromIndex(end);
+  cm.setSelection(from, to);
+  cm.scrollIntoView({ from, to }, 80);
+  cm.focus();
+}
+
+/* ══════════════════════════════════════════════
+   REGEX / CONSTANTS (ported from parse_hindi.py)
+══════════════════════════════════════════════ */
+const DEVA = '०१२३४५६७८९';
+function devaToInt(s){
+  let out='';
+  for(const c of s){ const i=DEVA.indexOf(c); if(i>=0) out+=i; }
+  return out ? parseInt(out,10) : null;
+}
+function toDeva(n){ return String(n).split('').map(d=>DEVA[+d]||d).join(''); }
+
+const SARGA_TITLE_RE = /सर्गः\s*\(\s*(?:सर्ग\s+)?(\d+)\s*\)/;
+
+const MARKER_RE = /\{([SsHh])(\d+)(?:-(\d+))?(?:\s+1\/2)?\}/g;
+
+function freshStampRe(){
+  // leading danda stamp: ।N। or ॥N॥ possibly with range/half-verse marks.
+  // Some source pages render the danda as a plain ASCII pipe character instead of the real
+  // Devanagari danda/double-danda — e.g. "|| ७४॥" — so "|" or "||" is accepted as an
+  // equivalent delimiter on either side, not just the proper ।/॥ characters.
+  return /(?:[।॥]|\|{1,2})\s*[०-९][\s०-९\-–/]*(?:[।॥]|\|{1,2})/g;
+}
+
+const SKIP_MARKERS = [
+  'Spread the Glory','बालकाण्डम्','अयोध्याकाण्डम्','अरण्यकाण्डम्',
+  'किष्किन्धाकाण्डम्','सुन्दरकाण्डम्','युद्धकाण्डम्','उत्तरकाण्डम्',
+  'श्रीसीतारामचन्द्राभ्यां','हिंदी अर्थ सहित','इत्यार्षे','इत्याचे',
+  'इस प्रकार श्रीवाल्मीकि','Valmiki Ramayana','वाल्मीकि रामायण',
+  'हिंदूधर्म','सर्गः (सर्ग'
+];
+
+const HINDI_WORDS = ["हुए","हैं","है","थे","था","थी","किया","गये","हुआ","करके","लिये","उन्होंने","बोले","देखा","कहा","दिया","लिया","गया","आया","होकर","लगे","उसने","कहते","रहते","करते","आते","होती","जाती","करती","पूछा","सुना","माना","चाहा","सोचा","पहुँचे","बताया","मिला","मिली","चले","गयी","आयी","रहा","रही","बोली","बोलीं","सुनकर","मारा","लड़े","उनका","उनके","उनसे","उनकी","उनको","अपने","अपनी","अपना","उसका","उसके","उसकी","उसको","इसका","इसके","इसकी","वहाँ","यहाँ","उसी","इसी","यही","वही","तदनन्तर","तत्पश्चात्","इसलिये","इसलिए","क्योंकि","जिन्हें","जिनमें","जिन्होंने","जिसमें",
+  // Common Hindi particles/copulas that are safe additions — unlike के/का/को (which are also
+  // genuine classical Sanskrit interrogative pronoun forms — "who/what" — and so were tried
+  // and reverted after causing false positives on real Sanskrit lines), these don't overlap
+  // with standard Sanskrit vocabulary.
+  "से","ने","और","भी"];
+// Word-boundary lookbehind/lookahead — avoids matching these as substrings inside Sanskrit words
+// (e.g. "थे" falsely matching inside "तथेति")
+// Lookahead excludes Devanagari letters/vowel-signs/digits (word-continuing characters) but
+// allows danda and double-danda (।॥) through, since those are punctuation, not letters —
+// a Hindi word directly followed by "।" or "॥" with no space (e.g. "थे॥") should still count.
+const HINDI_RE = new RegExp("(?<![^\\s।॥,])(" + HINDI_WORDS.join("|") + ")(?=[^\\u0900-\\u0963\\u0966-\\u097F]|$)", "g");
+function hindiScore(text){ const m = text.match(HINDI_RE); return m ? m.length : 0; }
+// Kanda-completion marker (e.g. "॥अरण्यकाण्डं सम्पूर्णम्॥") — appears once, on its own,
+// in the last sarga of each kanda. SKIP_MARKERS above only lists the kanda names with the
+// "...काण्डम्" (virama-म्) ending used in title lines elsewhere in these files, but this
+// completion line instead uses the "...काण्डं" (anusvara) ending — a different Unicode
+// string that doesn't match those entries via includes(). Match generically on the
+// "काण्ड...सम्पूर्णम्" / "...संपूर्णम्" pattern so it's caught regardless of which kanda or
+// which of the two valid nasalization spellings the source page used.
+const KANDA_COMPLETE_RE = /काण्ड\S*\s*(?:सम्पूर्णम्|संपूर्णम्)/;
+function isSkip(text){
+  if(SKIP_MARKERS.some(m => text.includes(m))) return true;
+  if(KANDA_COMPLETE_RE.test(text)) return true;
+  return false;
+}
+function hasDanda(text){ return /[।॥]|\|{1,2}/.test(text); }
+
+function looksLikeSanskrit(text){
+  const hs = hindiScore(text);
+  if(hs >= 2) return false;
+  const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+  if(!lines.length) return true;
+  // Short pada-like lines with no Hindi markers -> Sanskrit. This must NOT require a stamp
+  // to already be present in the text: this function is also used to classify blocks that
+  // are missing their stamp entirely, where requiring one would always fail and silently
+  // force every stamp-less block to be treated as Hindi regardless of its real content.
+  if(lines.every(l => l.length < 90)) return hs <= 0;
+  return false;
+}
+
+function getMarker(text){
+  MARKER_RE.lastIndex = 0;
+  let m, last=null;
+  while((m = MARKER_RE.exec(text)) !== null){
+    last = { type: m[1].toUpperCase(), first: parseInt(m[2],10), last: m[3]?parseInt(m[3],10):parseInt(m[2],10) };
+  }
+  return last;
+}
+
+function getSpan(text){
+  const stampRe = freshStampRe();
+  let nums = [];
+  let m;
+  while((m = stampRe.exec(text)) !== null){
+    let inner = m[0].replace(/^(?:[।॥]|\|{1,2})\s*/,'').replace(/\s*(?:[।॥]|\|{1,2})$/,'');
+    inner = inner.replace(/[०-९]+\s*\/\s*[०-९]+/g,'').replace(/½/g,'');
+    const digitGroups = inner.match(/[०-९]+/g) || [];
+    for(const g of digitGroups){
+      const v = devaToInt(g);
+      if(v && v>=1 && v<=500) nums.push(v);
+    }
+  }
+  if(!nums.length) return [null,null];
+  let sf = Math.min(...nums), sl = Math.max(...nums);
+  if(sl - sf > 10){ sf = sl = Math.max(...nums); }
+  return [sf, sl];
+}
+
+/* ══════════════════════════════════════════════
+   BLOCK SPLITTING (with exact char offsets)
+══════════════════════════════════════════════ */
+// Some source pages leave a stray site-label line (e.g. "हिंदूधर्म") glued directly onto
+// the end of a real verse/translation block with no blank line before it. If we don't
+// account for this, the whole block gets treated as skippable boilerplate and the real
+// content on it (a correctly-stamped translation, say) is silently lost. So before
+// splitting into blocks, we blank out any line that is *exactly* one of these known
+// stray labels (replacing it with spaces of the same length, so no character offsets
+// shift), which forces a block boundary there and leaves the real content on its own.
+const STRAY_LINE_MARKERS = new Set(['हिंदूधर्म', 'Spread the Glory of Sri SitaRam!', 'Spread the Glory']);
+
+// Footnote-definition lines (e.g. "* 'छिन्नशोणितम्' की व्युत्पत्ति...") are sometimes glued
+// directly onto the end of a verse/translation with no blank line separating them, and are
+// followed immediately by the next verse with no blank line either. Left alone, the footnote
+// text gets merged into whatever segment follows it — corrupting classification (a footnote's
+// Hindi prose can outweigh real Sanskrit verse text sitting right next to it in the same
+// segment) and risking any incidental digit in the footnote (a citation, cross-reference, etc.)
+// being misread as a verse stamp. A footnote *reference* mark ("करनेवाले* उस गजकंद") appears
+// mid-line, not at the start, so matching only lines that *start* with "*" after trimming
+// reliably targets footnote-definition lines without touching normal verse/translation text.
+//
+// A footnote's explanation often continues onto further lines that don't carry their own "*"
+// (e.g. a second line elaborating on the citation given in the first). Those continuation
+// lines need excluding too, or they end up glued to whatever verse follows. We keep excluding
+// lines once a footnote has started until we hit either a blank line, or a line that itself
+// carries a real verse stamp (freshStampRe matches it) — the latter meaning actual verse or
+// translation content has resumed, not more footnote prose.
+// Footnotes in this text use two conventions: an asterisk ("* ...") or a Devanagari number
+// followed by a period ("१. ... २. ..." — often several numbered notes packed onto one line).
+// A verse's own stamp is always inside a danda (।N। / ॥N॥), never a bare "N." at the start of
+// a line, so this is a safe, distinct signal from real verse numbering.
+function isFootnoteStart(line){
+  const t = line.trim();
+  return t.startsWith('*') || /^[०-९]+\.\s/.test(t);
+}
+
+// True if a line looks like real verse/translation content has resumed after a footnote —
+// either it carries its own valid stamp, or it's short with no Hindi markers (a bare Sanskrit
+// pada line often has no stamp of its own, since only the second line of a two-line shloka
+// carries the closing stamp). This is only applied to lines *after* the footnote's starting
+// line — the starting line itself is always blanked regardless of its content, since a
+// footnote can itself quote a short Sanskrit citation that would otherwise look identical
+// to real verse content by this same test.
+function looksLikeVerseResuming(line){
+  if(freshStampRe().test(line)) return true;
+  const t = line.trim();
+  return t.length < 90 && hindiScore(line) === 0;
+}
+
+function blankFootnotes(text){
+  const lines = text.split('\n');
+  let inFootnote = false;
+  for(let i = 0; i < lines.length; i++){
+    const line = lines[i];
+    if(!line.trim()){ inFootnote = false; continue; }
+    if(isFootnoteStart(line)){
+      inFootnote = true;
+      lines[i] = ' '.repeat(line.length);
+      continue;
+    }
+    if(inFootnote){
+      if(looksLikeVerseResuming(line)){ inFootnote = false; }
+      else { lines[i] = ' '.repeat(line.length); }
+    }
+  }
+  return lines.join('\n');
+}
+
+function getBlocks(text){
+  let cleaned = text.split('\n').map(line =>
+    STRAY_LINE_MARKERS.has(line.trim()) ? ' '.repeat(line.length) : line
+  ).join('\n');
+  cleaned = blankFootnotes(cleaned);
+
+  const blocks = [];
+  // Matches one or more consecutive blank-or-blanked lines as a single gap. Must repeat the
+  // "spaces-then-newline" unit (not just allow one line of spaces followed by raw newlines) —
+  // footnote/stray-line exclusion above can blank out several consecutive lines in a row
+  // (each a real line's worth of spaces, not an empty line), and those need to count as one
+  // continuous gap rather than only the first such line being recognized.
+  const re = /\n(?:[ \t]*\r?\n)+/g;
+  let lastEnd = 0, m;
+  const pushBlock = (rawStart, rawEndExclusive) => {
+    const raw = text.slice(rawStart, rawEndExclusive); // sliced from the ORIGINAL text
+    const leading = raw.length - raw.trimStart().length;
+    const trimmed = raw.trim();
+    if(!trimmed) return;
+    const start = rawStart + leading;
+    blocks.push({ text: trimmed, start, end: start + trimmed.length });
+  };
+  while((m = re.exec(cleaned)) !== null){
+    pushBlock(lastEnd, m.index);
+    lastEnd = re.lastIndex;
+  }
+  pushBlock(lastEnd, text.length);
+  return blocks;
+}
+
+/* ══════════════════════════════════════════════
+   SEGMENT BY SARGA
+══════════════════════════════════════════════ */
+function segmentBySarga(blocks){
+  const segments = []; // {sarga, blocks:[], titleStart}
+  let current = null;
+  for(const b of blocks){
+    const tm = b.text.match(SARGA_TITLE_RE);
+    if(tm){
+      current = { sarga: parseInt(tm[1],10), blocks: [], titleStart: b.start };
+      segments.push(current);
+      continue;
+    }
+    if(current) current.blocks.push(b);
+  }
+  return segments;
+}
+
+/* ══════════════════════════════════════════════
+   STAMP EVENTS — every marker/auto-stamp occurrence in a block, in order
+══════════════════════════════════════════════ */
+// A block normally has exactly one stamp. But when the source is missing a blank line
+// somewhere inside it, two (or more) genuinely different pieces of content end up glued
+// into one block — e.g. a Hindi paragraph for verse 53 glued directly onto the Sanskrit
+// lines for verse 54, or two verses' Sanskrit both landing in one paragraph. Rather than
+// guessing a single Sanskrit-or-Hindi label for the whole glued mess, we find every
+// individual stamp in the block and later split the text at each one, so each piece gets
+// classified on its own.
+function getStampEvents(text){
+  const events = [];
+  const stampRe = freshStampRe();
+  let m;
+  while((m = stampRe.exec(text)) !== null){
+    let inner = m[0].replace(/^(?:[।॥]|\|{1,2})\s*/,'').replace(/\s*(?:[।॥]|\|{1,2})$/,'');
+    const isHalf = /[०-९]+\s*\/\s*[०-९]+/.test(inner) || /½/.test(inner);
+    inner = inner.replace(/[०-९]+\s*\/\s*[०-९]+/g,'').replace(/½/g,'');
+    const digitGroups = inner.match(/[०-९]+/g) || [];
+    let nums = [];
+    for(const g of digitGroups){ const v = devaToInt(g); if(v && v>=1 && v<=500) nums.push(v); }
+    if(nums.length){
+      let f = Math.min(...nums), l = Math.max(...nums);
+      if(l - f > 10){ f = l = Math.max(...nums); }
+      events.push({ start:m.index, end:m.index+m[0].length, first:f, last:l, kind:'auto', isHalf });
+    }
+  }
+  MARKER_RE.lastIndex = 0;
+  while((m = MARKER_RE.exec(text)) !== null){
+    events.push({ start:m.index, end:m.index+m[0].length,
+      first:parseInt(m[2],10), last:m[3]?parseInt(m[3],10):parseInt(m[2],10),
+      kind:'marker', type:m[1].toUpperCase(), isHalf:false });
+  }
+  events.sort((a,b) => a.start - b.start);
+  return events;
+}
+
+/* ══════════════════════════════════════════════
+   CORE SCAN — per sarga gap detection
+══════════════════════════════════════════════ */
+function scanSegment(seg){
+  let sExp = 1, hExp = 1;
+  const issues = [];
+  let lastBlockEnd = seg.titleStart;
+  let lastS = null; // { first, last, start, end } — most recently accepted Sanskrit stamp, for pair-checking
+  const sClaims = {}; // verse -> list of block-start positions that claimed it (Sanskrit side)
+  const hClaims = {}; // verse -> list of block-start positions that claimed it (Hindi side)
+
+  function claim(map, first, last, startAbs){
+    for(let v = first; v <= last; v++){
+      map[v] = map[v] || [];
+      map[v].push(startAbs);
+    }
+  }
+
+  // Applies one classified stamp (S or H, with a first/last verse number) against the
+  // running counters, reporting a gap/mismatch issue if it doesn't fit where expected.
+  function processEff(eff, startAbs, endAbs, previewText){
+    if(eff.type === 'S'){
+      let accepted = false;
+      if(eff.first <= sExp && sExp <= eff.last){ sExp = eff.last + 1; accepted = true; }
+      else if(eff.first === sExp){ sExp = eff.last + 1; accepted = true; }
+      else if(eff.first > sExp){
+        issues.push({ kind:'gap', side:'S', verse:sExp, lastVerse:eff.first-1,
+          note:`Expected Sanskrit stamp for verse ${sExp}, but next stamp found is ${eff.first}. A verse (or its stamp) may be missing between them.`,
+          start:startAbs, end:endAbs, preview:previewText.slice(0,140) });
+        sExp = eff.last + 1;
+        accepted = true;
+      }
+      if(accepted){
+        claim(sClaims, eff.first, eff.last, startAbs);
+        lastS = { first: eff.first, last: eff.last, start: startAbs, end: endAbs };
+      }
+    } else { // type H
+      // A Hindi stamp with a "½" mark (e.g. "२ १/२") always signals a combined translation
+      // covering more than one verse — a plain single-verse stamp never carries a ½. Some
+      // pages write the full range ("३–६ १/२") but others only give the ending point ("२ १/२"),
+      // leaving the reader to infer it covers everything back to the verse we were expecting.
+      // Since the ½ mark itself is a reliable signal (not a guess), widen the range back to
+      // the expected verse in that case — but only when ½ is present, so an ordinary bare
+      // number that jumps ahead (no ½) still gets flagged as a real gap, not silently absorbed.
+      if(eff.isHalf && eff.first > hExp && hExp <= eff.last){
+        eff = { ...eff, first: hExp };
+      }
+      // Direct pair check against the Sanskrit stamp this Hindi content should be closing,
+      // independent of the running counter (catches typos like {s34} paired with {h35}).
+      // Only applies to simple single-verse-to-single-verse pairs — a combined Hindi
+      // translation (e.g. covering verses 35-41 in one stamp) legitimately reaches back
+      // further than the immediately preceding single Sanskrit stamp, so that's not a mismatch.
+      const hIsSingle = eff.first === eff.last;
+      const sIsSingle = lastS && lastS.first === lastS.last;
+      if(lastS && hIsSingle && sIsSingle && eff.first !== lastS.first){
+        issues.push({ kind:'mismatch', side:'H', verse:eff.first, lastVerse:eff.last,
+          note:`Sanskrit stamp just above was {s${lastS.first}} but this Hindi stamp says {h${eff.first}}. These should match — likely a typo in one of them.`,
+          start:startAbs, end:endAbs, preview:previewText.slice(0,140) });
+      }
+      if(eff.first <= hExp && hExp <= eff.last){ hExp = eff.last + 1; }
+      else if(eff.first === hExp){ hExp = eff.last + 1; }
+      else if(eff.first > hExp){
+        issues.push({ kind:'gap', side:'H', verse:hExp, lastVerse:eff.first-1,
+          note:`Expected Hindi stamp for verse ${hExp}, but next stamp found is ${eff.first}. Its translation may be missing a stamp.`,
+          start:startAbs, end:endAbs, preview:previewText.slice(0,140) });
+        hExp = eff.last + 1;
+      }
+      claim(hClaims, eff.first, eff.last, startAbs);
+    }
+  }
+
+  for(const b of seg.blocks){
+    if(isSkip(b.text) || SARGA_TITLE_RE.test(b.text)) continue;
+
+    const events = getStampEvents(b.text);
+
+    // Skip blocks that are neither verse/translation-shaped (no danda/double-danda anywhere)
+    // NOR carrying a stamp of some kind — this filters out sarga-summary lines etc. But a
+    // block whose *only* stamp is a manual {s7}/{h7} marker (added where the source was
+    // missing its usual punctuation-and-stamp entirely) must still go through, even with
+    // no danda present, or the marker — and the real content it's attached to — gets
+    // silently discarded.
+    if(!hasDanda(b.text) && events.length === 0) continue;
+
+    if(events.length === 0){
+      // No stamp or marker anywhere in this block — it's a verse/translation missing its stamp entirely.
+      const isSkt = looksLikeSanskrit(b.text);
+      if(isSkt){
+        issues.push({ kind:'missing', side:'S', verse:sExp, lastVerse:sExp,
+          note:`No stamp found on this Sanskrit-looking verse block. Needs {s${sExp}}.`,
+          start:b.start, end:b.end, preview:b.text.slice(0,140) });
+        lastS = { first: sExp, last: sExp, start: b.start, end: b.end };
+        claim(sClaims, sExp, sExp, b.start);
+        sExp++;
+      } else {
+        issues.push({ kind:'missing', side:'H', verse:hExp, lastVerse:hExp,
+          note:`No stamp found on this Hindi-looking text block. Needs {h${hExp}}.`,
+          start:b.start, end:b.end, preview:b.text.slice(0,140) });
+        claim(hClaims, hExp, hExp, b.start);
+        hExp++;
+      }
+    } else if(events.length === 1){
+      // The common case — one stamp closing the whole block. Classify the block as a whole,
+      // same as always.
+      const ev = events[0];
+      const eff = ev.kind === 'marker'
+        ? { type: ev.type, first: ev.first, last: ev.last, isHalf: false }
+        : { type: looksLikeSanskrit(b.text) ? 'S' : 'H', first: ev.first, last: ev.last, isHalf: ev.isHalf };
+      processEff(eff, b.start, b.end, b.text);
+    } else {
+      // Multiple stamps landed in one block — the source is missing a blank line somewhere
+      // inside it. Split at each stamp and classify each piece on its own merits, instead
+      // of guessing one label for the whole glued-together block.
+      let prevEnd = 0;
+      for(const ev of events){
+        const segText = b.text.slice(prevEnd, ev.end);
+        const segStartAbs = b.start + prevEnd;
+        const segEndAbs = b.start + ev.end;
+        const eff = ev.kind === 'marker'
+          ? { type: ev.type, first: ev.first, last: ev.last, isHalf: false }
+          : { type: looksLikeSanskrit(segText) ? 'S' : 'H', first: ev.first, last: ev.last, isHalf: ev.isHalf };
+        processEff(eff, segStartAbs, segEndAbs, segText);
+        prevEnd = ev.end;
+      }
+    }
+    lastBlockEnd = b.end;
+  }
+
+  // Duplicate check — same verse number claimed by more than one block on the same side
+  for(const [map, side] of [[sClaims,'S'], [hClaims,'H']]){
+    for(const v of Object.keys(map)){
+      const starts = map[v];
+      if(starts.length > 1){
+        issues.push({ kind:'duplicate', side, verse: parseInt(v,10), lastVerse: parseInt(v,10),
+          note:`Verse ${v} is stamped as {${side.toLowerCase()}${v}} in ${starts.length} different places in this sarga. One of these is likely a typo for a different verse number.`,
+          start: starts[starts.length-1], end: starts[starts.length-1], preview:'' });
+      }
+    }
+  }
+
+  if(hExp < sExp){
+    issues.push({ kind:'warning', side:'H', verse:hExp, lastVerse:sExp-1,
+      note:`Sarga ends with Sanskrit verse(s) up to ${sExp-1} but Hindi translation only confirmed up to ${hExp-1}. Check the end of this sarga.`,
+      start:lastBlockEnd, end:lastBlockEnd, preview:'' });
+  } else if(sExp < hExp){
+    issues.push({ kind:'warning', side:'S', verse:sExp, lastVerse:hExp-1,
+      note:`Hindi translation confirmed up to ${hExp-1} but Sanskrit stamps only confirmed up to ${sExp-1}. Check the end of this sarga.`,
+      start:lastBlockEnd, end:lastBlockEnd, preview:'' });
+  }
+
+  return { issues, finalSVerse: sExp-1, finalHVerse: hExp-1 };
+}
+
+/* ══════════════════════════════════════════════
+   FULL SCAN
+══════════════════════════════════════════════ */
+let scanResult = null; // { sargas:[{num, issues, verseCount}], flatIssues:[...] }
+let currentIssueIdx = -1;
+
+function scanOnly(){
+  const text = getEditorValue();
+  const blocks = getBlocks(text);
+  const segments = segmentBySarga(blocks);
+
+  const sargas = [];
+  const flat = [];
+  for(const seg of segments){
+    const r = scanSegment(seg);
+    sargas.push({ num: seg.sarga, issues: r.issues, verseCount: Math.max(r.finalSVerse, r.finalHVerse) });
+    for(const iss of r.issues){ iss.sarga = seg.sarga; flat.push(iss); }
+  }
+  flat.sort((a,b) => a.start - b.start);
+  scanResult = { sargas, flatIssues: flat };
+  currentIssueIdx = flat.length ? 0 : -1;
+  renderResults();
+  return scanResult;
+}
+
+function runScan(){
+  scanOnly();
+  if(scanResult.flatIssues.length) jumpToIssue(0);
+  return scanResult;
+}
+
+/* ══════════════════════════════════════════════
+   RENDERING
+══════════════════════════════════════════════ */
+function renderResults(){
+  const stats = document.getElementById('stats');
+  const jumpSel = document.getElementById('sarga-jump');
+
+  if(!scanResult){ return; }
+  const totalIssues = scanResult.flatIssues.length;
+  const sargaCount = scanResult.sargas.length;
+  stats.innerHTML = `<span><b>${sargaCount}</b> sargas found</span><span><b>${totalIssues}</b> issue${totalIssues===1?'':'s'} remaining</span>`;
+
+  jumpSel.innerHTML = scanResult.sargas.map(s =>
+    `<option value="${s.num}">Sarga ${s.num}${s.issues.length ? ` (${s.issues.length})` : ' ✓'}</option>`
+  ).join('');
+
+  document.getElementById('btn-prev-issue').disabled = totalIssues === 0;
+  document.getElementById('btn-next-issue').disabled = totalIssues === 0;
+
+  renderCurrentIssueBar();
+}
+
+function renderCurrentIssueBar(){
+  const bar = document.getElementById('current-issue-bar');
+  const info = document.getElementById('issue-info');
+  bar.className = '';
+
+  if(!scanResult){ info.textContent = 'No scan yet.'; return; }
+  const total = scanResult.flatIssues.length;
+  if(!total){ info.textContent = '✓ No issues found — every verse has a matched Sanskrit + Hindi stamp pair in sequence.'; return; }
+
+  const idx = Math.max(0, currentIssueIdx);
+  const iss = scanResult.flatIssues[idx];
+  const rangeLabel = iss.lastVerse !== iss.verse ? `${iss.verse}–${iss.lastVerse}` : `${iss.verse}`;
+  bar.className = iss.kind;
+  info.innerHTML = `<b>${idx+1} / ${total}</b> · Sarga ${iss.sarga} · ${iss.side==='S'?'Sanskrit':'Hindi'} verse ${rangeLabel} — ${iss.note}`;
+}
+
+/* ══════════════════════════════════════════════
+   JUMP / INSERT ACTIONS
+══════════════════════════════════════════════ */
+function jumpToIssue(idx){
+  currentIssueIdx = idx;
+  const iss = scanResult.flatIssues[idx];
+  if(!iss) return;
+  jumpEditorTo(iss.start, iss.end);
+  renderCurrentIssueBar();
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.display = 'block';
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.style.display = 'none', 2200);
+}
+
+/* ══════════════════════════════════════════════
+   WIRE UP UI
+══════════════════════════════════════════════ */
+document.getElementById('btn-scan').addEventListener('click', runScan);
+
+document.getElementById('btn-next-issue').addEventListener('click', () => {
+  const cursorPos = cm.indexFromPos(cm.getCursor());
+  scanOnly(); // refresh first — a manual edit since the last scan can shift issue positions
+  if(!scanResult.flatIssues.length){ toast('✓ All issues fixed!'); return; }
+  let idx = scanResult.flatIssues.findIndex(iss => iss.start > cursorPos);
+  if(idx === -1){
+    idx = scanResult.flatIssues.length - 1; // already at/past the last issue — stay on it
+    toast('You\u2019ve reached the last issue.');
+  }
+  jumpToIssue(idx);
+});
+document.getElementById('btn-prev-issue').addEventListener('click', () => {
+  const cursorPos = cm.indexFromPos(cm.getCursor());
+  scanOnly(); // refresh first — a manual edit since the last scan can shift issue positions
+  if(!scanResult.flatIssues.length){ toast('✓ All issues fixed!'); return; }
+  let idx = -1;
+  for(let i = scanResult.flatIssues.length - 1; i >= 0; i--){
+    if(scanResult.flatIssues[i].start < cursorPos){ idx = i; break; }
+  }
+  if(idx === -1){
+    idx = 0; // already at/before the first issue — stay on it
+    toast('You\u2019ve reached the first issue.');
+  }
+  jumpToIssue(idx);
+});
+
+document.getElementById('file-input').addEventListener('change', (e) => {
+  const f = e.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    setEditorValue(reader.result);
+    toast(`Loaded ${f.name}`);
+    runScan();
+  };
+  reader.readAsText(f, 'utf-8');
+});
+
+document.getElementById('sarga-jump').addEventListener('change', (e) => {
+  const num = parseInt(e.target.value, 10);
+  const blocks = getBlocks(getEditorValue());
+  const segs = segmentBySarga(blocks);
+  const seg = segs.find(s => s.sarga === num);
+  if(!seg) return;
+  jumpEditorTo(seg.titleStart, seg.titleStart + 20);
+});
+
+document.getElementById('btn-download').addEventListener('click', () => {
+  const text = getEditorValue();
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'edited.txt';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>
