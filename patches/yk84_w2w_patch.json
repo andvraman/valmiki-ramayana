@@ -1,0 +1,27 @@
+{
+ "kanda": "Yuddha Kanda",
+ "sarga": 84,
+ "translation": {
+  "3": "सः he (Vibheeshana), शोकलालसम् sunk in grief, महात्मानम् the great souled, राघवम् Raghava, अभिगम्य having approached, बाष्पपर्याकुलेक्षणान् with eyes brimming with tears, वानरान् च एव and the vanaras too, ददृशे saw",
+  "11": "हितचिकीर्षुणा desirous of his welfare, मया by me, सुबहुशः again and again, वैदेहीम् Vaidehi, उत्सृजस्व release, इति thus, याच्यमानः being entreated, तत् वचः that word, न च कृतवान् he did not act upon",
+  "12": "न एव साम्ना neither by conciliation, न भेदेन nor by dissension, न दानेन nor by gift, कुतः युधा how then by war, सा she, अन्येन केनचित् च nor by any other means, द्रष्टुम् अपि even to be seen, न एव शक्येत could not be possible",
+  "13": "वानरान् the vanaras, मोहयित्वा तु having deluded, सः राक्षसः that demon, प्रतियातः has gone back, महाबाहो O mighty armed one, ताम् जनकात्मजाम् that daughter of Janaka, मायामयीम् to be wrought of illusion, विद्धि know",
+  "14": "निकुम्भिलाम् नाम named Nikumbhila, चैत्यम् the sanctuary, यत्र where, होमम् the oblation, करिष्यति he will perform, हुतवान् having offered the oblation, उपयातः हि and returned indeed",
+  "15": "एषः रावणात्मजः this son of Ravana, सङ्ग्रामे in battle, सवासवैः देवैः अपि even by the gods together with Vasava, दुराधर्षः unassailable, भवति becomes, मोहयता seeking to delude, तेन by him, एषा माया this illusion, नूनम् surely, प्रयोजिता was employed",
+  "16": "तात dear one, वानराणाम् of the vanaras, पराक्रमे in the valour, विघ्नम् an obstacle, अन्विच्छता by him who seeks, यावत् while, तत् that rite, न समाप्यते is not completed, ससैन्याः along with the army, तत्र there, गच्छामः let us go",
+  "17": "नरशार्दूल O tiger among men, मिथ्या आगतम् arisen from a falsehood, इमम् सन्तापम् this grief, त्यज abandon, शोककर्शितम् wasted by sorrow, त्वाम् you, दृष्ट्वा seeing, सर्वम् बलम् the whole army, सीदते हि indeed loses heart",
+  "18": "त्वम् you, इह here, स्वस्थहृदयः with heart at ease, सत्त्वसमुच्छ्रितः firm in courage, तिष्ठ remain, सैन्यानुकर्षिभिः who lead the army, अस्माभिः सह along with us, लक्ष्मणम् Lakshmana, प्रेषय send forth",
+  "19": "एषः नरशार्दूलः this tiger among men, निशितैः शरैः with whetted arrows, तम् रावणिम् that son of Ravana, तत्कर्म that rite, त्याजयिष्यति will make him abandon, ततः thereafter, वध्यः fit to be slain, भविष्यति he will become",
+  "20": "तस्य his, एते these, निशिताः whetted, तीक्ष्णाः sharp, पत्रिपत्राङ्गवाजिनः winged with the plumage of birds, पतत्रिणः इव like birds, असौम्याः fierce, शराः arrows, शोणितम् his blood, पास्यन्ति will drink",
+  "21": "तत् therefore, महाबाहो O mighty armed one, शुभलक्षणम् of auspicious marks, लक्ष्मणम् Lakshmana, राक्षसस्य of the demon, विनाशाय for the destruction, सन्दिश dispatch, वज्रधरः the wielder of the thunderbolt, वज्रम् यथा as he hurls his bolt",
+  "22": "मनुजवर O best of men, रिपुनिधनम् प्रति with regard to the slaying of the enemy, यत् अद्य कर्तुम् क्षमः what can be accomplished today, कालविप्रकर्षः न let there be no dragging out of time, त्वम् you, रिपोः of the enemy, वधाय for the slaying, वज्रं the thunderbolt, अतिसृज release, असुरपुरोन्मथने in the shattering of the city of the asuras, महेन्द्रः यथा as Mahendra did",
+  "23": "सः राक्षसर्षभः that bull among demons, समाप्तकर्मा हि his rite once completed, समरे in battle, सुरासुरैः by gods and asuras alike, अदृश्यः unseeable, भवति becomes, समाप्तकर्मणा तेन with him whose rite stands completed, युयुत्सता for one wishing to fight, सुराणाम् अपि even for the gods, महान् संशयः grave peril, भवेत् there would be"
+ },
+ "shloka_text_fix": {
+  "22": {
+   "from": "बाणीम्",
+   "to": "वज्रं",
+   "note": "Gita Press reading, confirmed by Anand"
+  }
+ }
+}
