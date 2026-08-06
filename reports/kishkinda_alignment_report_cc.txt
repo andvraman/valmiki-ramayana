@@ -1,0 +1,18 @@
+Kishkindha alignment pilot — results
+I built align_recension.py (one script, parameterised by kanda — python3 align_recension.py N) and ran it over Kishkindha. It emitted 66 map_4_{sarga}.json files and alignment_report_kishkindha.md. Nothing was written to data.json or the .txt files.
+
+Method note: raw similarity looked alarming at first (31/67 below 0.85) but that was two artifacts, both handled: SequenceMatcher's default autojunk corrupts Devanagari ratios (I use autojunk=False), and data.json stores AshuVj's combined verse blocks redundantly on every shloka number they span (403 rows across 52 sargas). I reconstruct true per-shloka Sanskrit by splitting each shloka_text on its embedded 4.s.n stamps — this restored clean alignments (e.g. sarga 29: 0.50 → 0.95) and gives shloka-level mapping precision.
+
+Headline (67 sargas)
+52 OK (sim ≥ 0.85), 14 REVIEW (0.55–0.85, heavy but real divergence), 1 FAILED.
+9 sargas clean 1:1 throughout: 7, 21, 23, 28, 35, 36, 44, 60, 62.
+43 OK sargas have ragged joins. Kinds (excl. FAILED): 218 GP-combines-dj, 54 GP-splits-dj, 42 GP-unmapped, 37 dj-uncovered. Mapping quality is strong — 75% of joins match at ≥0.90 (median 0.96), and zero clear mis-assignments in any OK sarga.
+14 tails do not close: 17, 20, 22, 25, 26, 33, 42, 45, 48, 52, 56, 57, 65, 66 — each detailed with the offending verse.
+Things the pilot turned up that go beyond the brief
+Sarga 16 FAILED (sim 0.11) — a source defect in the .txt. कks1-67.txt's sarga 16 (षोडशः सर्गः (सर्ग 16)) contains the hemanta-ṛtu / Godavari passage — Aranya-kanda material, not the real Kishkindha 16 (Vali rebuking Tara, which is in data.json). The sarga number is present, so the numeric integrity check passes; only content alignment caught it. No map was emitted. This needs a source fix, not an alignment decision.
+Two cross-sarga boundary shifts (recensions disagree on where sargas end, not just internal division): GP 52's tail (v20–32) = data.json 53's head (v1–13) at ratio 0.90, and GP 56's tail (v20–24) = data.json 57's head (v1–7) at 0.62. Reported in a "read first" section 0.
+2 suspect joins (sargas 5, 17) where a different data.json verse matches clearly better — flagged, not auto-rerouted.
+Inventory (step 1)
+One file, kks1-67.txt, filename range 1–67, contains exactly sargas 1–67 (67 headings, no mismatch). No sarga missing a file, none duplicated across files. The {s6}-style stamp-editor markers parse correctly as verse numbers.
+
+Per your instructions I'm stopping here — the ragged-join handling (concatenate splits, repeat-or-continuation for combines, the tail-close and boundary-shift cases, and what to do about the sarga-16 source defect) is a decision, not something to infer. Two questions stand out for that decision: how to handle the 2 cross-sarga boundary shifts (they can't be resolved within a single sarga's map), and whether sarga 16's .txt should be corrected at source before this kanda's Hindi is migrated.
