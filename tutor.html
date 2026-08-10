@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>सन्धि · where words meet</title>
+<style>
+:root{
+  /* Manuscript palette: lampblack-indigo ground, turmeric-treated palm leaf
+     for the Sanskrit, kumkum red to mark the letter that changed. */
+  --ink:#141B33; --ink2:#1D2748; --ink3:#27335C;
+  --leaf:#E4CE9C; --leaf-d:#C9AF78;
+  --kumkum:#D2453C; --turmeric:#E9A62A; --river:#54A79D;
+  --tx:#EEE9DD; --dim:#8E98B8; --line:#2E3A63;
+  --deva:'Noto Serif Devanagari','Kohinoor Devanagari','Devanagari Sangam MN',
+         'Noto Sans Devanagari','Nirmala UI',serif;
+  --ui:ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --num:ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--ink);color:var(--tx);font-family:var(--ui)}
+body{font-size:15px;line-height:1.55;padding-bottom:3rem}
+
+header{padding:.9rem 1.1rem .8rem;border-bottom:1px solid var(--line);
+  display:flex;align-items:baseline;gap:.75rem;flex-wrap:wrap}
+.mark{font-family:var(--deva);font-size:1.35rem;color:var(--turmeric);line-height:1}
+.title{font-size:.7rem;letter-spacing:.19em;text-transform:uppercase;color:var(--dim)}
+.pips{margin-left:auto;display:flex;gap:5px}
+.pip{width:16px;height:3px;border-radius:2px;background:var(--line)}
+.pip.done{background:var(--turmeric)}
+.pip.miss{background:var(--kumkum)}
+.pip.now{background:var(--river)}
+
+main{max-width:38rem;margin:0 auto;padding:1.1rem}
+.panel{background:var(--ink2);border:1px solid var(--line);border-radius:14px;
+  padding:1.15rem;margin-bottom:1rem}
+
+/* The leaf is where Sanskrit lives. Everything else is scaffolding. */
+.leaf{background:linear-gradient(177deg,var(--leaf),var(--leaf-d));
+  color:#241C0C;border-radius:11px;padding:1.15rem 1rem;text-align:center;
+  font-family:var(--deva);font-size:2.15rem;line-height:1.75;
+  word-break:break-word;box-shadow:0 1px 0 rgba(255,255,255,.35) inset}
+@media(max-width:420px){ .leaf{font-size:1.75rem} }
+.changed{color:var(--kumkum);font-weight:700}
+
+.ask{font-size:.94rem;color:var(--dim);margin:.95rem 0 .7rem}
+.opts{display:grid;gap:.5rem}
+.opt{display:block;width:100%;text-align:left;background:var(--ink3);
+  color:var(--tx);border:1px solid var(--line);border-radius:10px;
+  padding:.72rem .9rem;font-family:var(--deva);font-size:1.3rem;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--river)}
+.opt:focus-visible{outline:2px solid var(--river);outline-offset:2px}
+.opt:disabled{cursor:default;opacity:.55}
+.opt.right{background:#1E4A38;border-color:var(--river);opacity:1}
+.opt.wrong{background:#4A2028;border-color:var(--kumkum);opacity:1}
+
+/* Signature: the confluence. Two words converge; the seam is marked. */
+.conf{display:grid;gap:.35rem;justify-items:center;margin:.2rem 0 .9rem;
+  font-family:var(--deva);font-size:1.45rem}
+.conf .pair{display:flex;gap:.7rem;align-items:baseline;
+  animation:draw-in .55s cubic-bezier(.3,.9,.3,1) both}
+.conf .plus{color:var(--dim);font-size:1rem;font-family:var(--ui)}
+.conf .arrow{color:var(--river);font-size:.95rem;font-family:var(--ui);
+  animation:fade .4s .3s both}
+.conf .out{color:var(--turmeric);animation:fade .45s .5s both}
+@keyframes draw-in{from{opacity:0;transform:translateY(-5px)}to{opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.conf *{animation:none!important}}
+
+.rule{display:inline-flex;align-items:baseline;gap:.5rem;margin-bottom:.4rem}
+.rule .sa{font-family:var(--deva);font-size:1.1rem;color:var(--turmeric)}
+.rule .en{font-size:.8rem;letter-spacing:.05em;text-transform:uppercase;color:var(--dim)}
+.note{font-size:.93rem;color:var(--tx);opacity:.9}
+
+.verse{font-family:var(--deva);font-size:1.32rem;line-height:2.25;
+  white-space:pre-wrap;overflow-wrap:break-word;margin:.85rem 0 .5rem;
+  padding-top:.8rem;border-top:1px solid var(--line)}
+.verse .w1{color:var(--turmeric)}
+.verse .w2{color:var(--river)}
+.verse .tap{cursor:pointer;border-radius:3px}
+.verse .tap:not(.w1):not(.w2){box-shadow:inset 0 -1px 0 rgba(142,152,184,.5)}
+.verse .lit{background:var(--turmeric);color:#241C0C;box-shadow:none}
+.tapout{font-size:.9rem;color:var(--dim);min-height:1.5rem;margin-bottom:.5rem}
+.tapout .hw{font-family:var(--deva);font-size:1.1rem;color:var(--turmeric)}
+.gl{font-size:.85rem;color:var(--dim);display:flex;gap:.5rem;flex-wrap:wrap}
+.gl b{color:var(--tx);font-weight:600}
+.prose{margin:.7rem 0 0;font-size:.95rem;line-height:1.6;color:var(--tx);
+  opacity:.88;border-left:2px solid var(--line);padding-left:.75rem}
+.ref{font-family:var(--num);font-size:.72rem;color:var(--dim);margin-top:.5rem}
+
+.go{display:block;width:100%;margin-top:.9rem;background:var(--turmeric);
+  color:#241C0C;border:0;border-radius:10px;padding:.8rem;font-size:.95rem;
+  font-weight:600;font-family:inherit;cursor:pointer}
+.go:focus-visible{outline:2px solid var(--tx);outline-offset:2px}
+.ghost{background:none;color:var(--dim);border:1px solid var(--line)}
+
+.lead{font-size:1.02rem;margin:.2rem 0 .9rem}
+.lead b{color:var(--turmeric);font-weight:600}
+a{color:var(--river)}
+.tally{display:grid;gap:.4rem;margin:.9rem 0}
+.row{display:flex;align-items:baseline;gap:.6rem;font-size:.9rem}
+.row .sa{font-family:var(--deva);color:var(--turmeric);font-size:1.05rem}
+.row .n{margin-left:auto;font-family:var(--num);font-size:.8rem;color:var(--dim)}
+.err{color:#F0B4B4}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="mark">सन्धि</span>
+  <span class="title">where words meet</span>
+  <span class="pips" id="pips"></span>
+</header>
+
+<main id="app"><div class="panel">Loading the drills…</div></main>
+
+<script>
+const N = 8;                       // questions per session
+let BANK = null, quiz = [], at = 0, results = [];
+
+/* Devanagari combining marks. A text run must never start with one, nor come
+   straight after a virama: iOS Safari will not shape conjuncts across element
+   boundaries, and splitting mid-cluster tears them apart. */
+const COMB = new Set([...'\u093E\u093F\u0940\u0941\u0942\u0943\u0944\u0962\u0963\u0947\u0948\u094B\u094C\u0902\u0903\u0901\u093C\u094D\u200C\u200D']);
+const legal = (s,i) => i<=0||i>=s.length ? true
+  : !COMB.has(s[i]) && !'\u094D\u200C\u200D'.includes(s[i-1]);
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* Mark the part of the word that sandhi changed, by comparing the dictionary
+   form against what the verse shows. */
+function markTail(word, other){
+  let i = 0;
+  while (i < word.length && i < other.length && word[i] === other[i]) i++;
+  while (i > 0 && !legal(word, i)) i--;
+  return esc(word.slice(0,i)) + '<span class="changed">' + esc(word.slice(i)) + '</span>';
+}
+
+/* Render the verse in runs, every located word tappable. Runs, not single
+   characters: iOS Safari will not shape conjuncts across element boundaries.
+   Where a cluster is shared by two words at a sandhi seam it belongs to both,
+   and tapping again moves to the other. */
+function verseHTML(text, words, a, b){
+  const own = Array.from({length:text.length}, () => []);
+  words.forEach(([hw, gl, s, e], wi) => {
+    for (let i=s;i<e;i++) if (own[i]) own[i].push(wi);
+  });
+  const inSpan = (i, sp) => sp && i >= sp[0] && i < sp[1];
+  let html = '', cur = null;
+  const flush = () => {
+    if (!cur) return;
+    const cls = ['t'];
+    if (cur.o.length) cls.push('tap');
+    if (cur.a) cls.push('w1');
+    if (cur.b) cls.push('w2');
+    html += `<span class="${cls.join(' ')}" data-o="${cur.o.join(',')}">${esc(cur.t)}</span>`;
+    cur = null;
+  };
+  for (let i=0;i<text.length;i++){
+    const k = own[i].join(',');
+    const hitA = inSpan(i,a), hitB = inSpan(i,b);
+    if (cur && (k === cur.k && hitA === cur.a && hitB === cur.b || !legal(text,i))){
+      cur.t += text[i];
+      for (const o of own[i]) if (!cur.o.includes(o)) cur.o.push(o);
+      cur.a = cur.a || hitA; cur.b = cur.b || hitB; cur.k = cur.o.join(',');
+    } else {
+      flush(); cur = {k, o:[...own[i]], t:text[i], a:hitA, b:hitB};
+    }
+  }
+  flush();
+  return html;
+}
+
+/* Wire up tapping on the verse just rendered. */
+let tapSel = null, tapCycle = 0;
+function wireVerse(words){
+  const box = document.getElementById('verse-box');
+  if (!box) return;
+  box.onclick = e => {
+    const t = e.target.closest('.tap'); if (!t) return;
+    const o = (t.dataset.o || '').split(',').filter(x => x !== '').map(Number);
+    if (!o.length) return;
+    tapCycle = o.includes(tapSel) ? (o.indexOf(tapSel)+1) % o.length : 0;
+    tapSel = o[tapCycle];
+    box.querySelectorAll('.t').forEach(sp => {
+      const ids = (sp.dataset.o || '').split(',').filter(x => x !== '').map(Number);
+      sp.classList.toggle('lit', ids.includes(tapSel));
+    });
+    const [hw, gl] = words[tapSel];
+    document.getElementById('tapout').innerHTML =
+      `<span class="hw">${esc(hw)}</span> <span>${esc(gl)}</span>`;
+  };
+}
+
+/* Pick N items, round-robin across rules so one rule cannot fill the session,
+   and mix the two drill types. */
+function makeQuiz(items){
+  const byRule = {};
+  for (const it of items) (byRule[it.rule] ||= []).push(it);
+  const rules = Object.keys(byRule).sort(() => Math.random()-0.5);
+  for (const r of rules) byRule[r].sort(() => Math.random()-0.5);
+  const out = [], cursor = {};
+  while (out.length < N){
+    let added = false;
+    for (const r of rules){
+      cursor[r] = cursor[r] || 0;
+      if (cursor[r] < byRule[r].length && out.length < N){
+        out.push(byRule[r][cursor[r]++]); added = true;
+      }
+    }
+    if (!added) break;
+  }
+  return out.sort(() => Math.random()-0.5).slice(0, N);
+}
+
+const pips = () => document.getElementById('pips').innerHTML =
+  quiz.map((_,i) => `<span class="pip ${
+    results[i] === true ? 'done' : results[i] === false ? 'miss' :
+    i === at ? 'now' : ''}"></span>`).join('');
+
+function start(){
+  quiz = makeQuiz(BANK.items); at = 0; results = [];
+  ask();
+}
+
+function intro(){
+  document.getElementById('app').innerHTML = `
+  <div class="panel">
+    <p class="lead">Sanskrit is written the way it is <b>spoken</b>, not the way
+      words look on their own. When one word ends and the next begins, the
+      sounds bend to fit each other. That bending is <b>सन्धि</b> — confluence.</p>
+    <p class="lead">Nothing here is invented. Every example is a real line from
+      the Sundara Kāṇḍa, and the split is the one the commentary gives.</p>
+    <p style="font-size:.88rem;color:var(--dim)">The lesson behind these drills is
+      Rama Seshan Chandrasekaran's, used with his permission —
+      <a href="${BANK.lesson_url}" target="_blank" rel="noopener">read it in full</a>.
+      The explanations here are short prompts, not a substitute for it.</p>
+    <button class="go" id="begin">Start ${N} questions</button>
+  </div>`;
+  document.getElementById('begin').onclick = start;
+}
+
+const shuffle = a => a.map(v => [Math.random(), v])
+  .sort((x,y) => x[0]-y[0]).map(p => p[1]);
+
+function ask(){
+  pips();
+  const q = quiz[at];
+  q.shown = shuffle(q.options);        // fresh order every time it is asked
+  const isSplit = q.kind === 'split';
+  const prompt = isSplit ? esc(q.prompt) : markTail(q.prompt, q.answer);
+  document.getElementById('app').innerHTML = `
+  <div class="panel">
+    <div class="leaf">${prompt}</div>
+    <p class="ask">${isSplit
+      ? 'Two words have run together here. Which two?'
+      : 'This word has been changed by what follows it. What is its dictionary form?'}</p>
+    <div class="opts" id="opts">${
+      q.shown.map((o,i) =>
+        `<button class="opt" data-i="${i}">${esc(o)}</button>`).join('')}</div>
+  </div>`;
+  document.querySelectorAll('.opt').forEach(btn => {
+    btn.onclick = () => answer(btn, q);
+  });
+}
+
+function answer(btn, q){
+  const chosen = q.shown[+btn.dataset.i];
+  const ok = chosen === q.answer;
+  results[at] = ok;
+  pips();
+  document.querySelectorAll('.opt').forEach(b => {
+    b.disabled = true;
+    const v = q.shown[+b.dataset.i];
+    if (v === q.answer) b.classList.add('right');
+    else if (b === btn) b.classList.add('wrong');
+  });
+  reveal(q, ok);
+}
+
+function reveal(q, ok){
+  const r = BANK.rules[q.rule] || {sanskrit:'सन्धिः', title:'Sandhi', note:''};
+  const v = BANK.verses[q.ref] || {t:'', e:''};
+  const conf = q.kind === 'split'
+    ? `<div class="pair"><span>${esc(q.a)}</span><span class="plus">+</span>
+         <span>${esc(q.b)}</span></div>
+       <div class="arrow">▼</div>
+       <div class="out">${esc(q.prompt)}</div>`
+    : `<div class="pair"><span>${esc(q.answer)}</span></div>
+       <div class="arrow">▼</div>
+       <div class="out">${markTail(q.prompt, q.answer)}</div>`;
+
+  document.getElementById('app').insertAdjacentHTML('beforeend', `
+  <div class="panel">
+    <div class="conf">${conf}</div>
+    <div class="rule"><span class="sa">${esc(r.sanskrit)}</span>
+      <span class="en">${esc(r.title)}</span></div>
+    <p class="note">${esc(r.note)}</p>
+    <div class="verse" id="verse-box">${verseHTML(v.t, v.w||[], q.span_a, q.span_b)}</div>
+    <div class="tapout" id="tapout">Tap any word in the line for its meaning.</div>
+    <div class="gl"><span><b>${esc(q.a)}</b> ${esc(q.a_mean)}</span>
+      <span><b>${esc(q.b)}</b> ${esc(q.b_mean)}</span></div>
+    ${v.e ? `<p class="prose">${esc(v.e)}</p>` : ''}
+    <div class="ref">Sundara Kāṇḍa ${esc(q.ref.split('.').slice(1).join('.'))}</div>
+    <button class="go" id="next">${at + 1 < quiz.length ? 'Next' : 'See how it went'}</button>
+  </div>`);
+  tapSel = null; tapCycle = 0;
+  wireVerse(v.w || []);
+  const nx = document.getElementById('next');
+  nx.onclick = () => { at++; at < quiz.length ? ask() : done(); };
+  nx.focus();
+}
+
+function done(){
+  pips();
+  const right = results.filter(Boolean).length;
+  const byRule = {};
+  quiz.forEach((q,i) => {
+    (byRule[q.rule] ||= {ok:0, n:0}); byRule[q.rule].n++;
+    if (results[i]) byRule[q.rule].ok++;
+  });
+  const line = right === quiz.length
+      ? 'Every one. That is real reading, not guessing.'
+    : right >= quiz.length - 2
+      ? 'Close. The ones that slipped are the ones worth repeating.'
+      : 'Sandhi takes a while to hear. Going again is the whole method.';
+  document.getElementById('app').innerHTML = `
+  <div class="panel">
+    <div class="leaf">${right} / ${quiz.length}</div>
+    <p class="lead" style="margin-top:1rem">${line}</p>
+    <div class="tally">${Object.entries(byRule).map(([k,v]) => {
+      const r = BANK.rules[k] || {sanskrit:k, title:k};
+      return `<div class="row"><span class="sa">${esc(r.sanskrit)}</span>
+        <span style="color:var(--dim)">${esc(r.title)}</span>
+        <span class="n">${v.ok}/${v.n}</span></div>`;
+    }).join('')}</div>
+    <button class="go" id="again">Another ${N}</button>
+    <button class="go ghost" id="back" style="margin-top:.5rem">Back to the start</button>
+  </div>`;
+  document.getElementById('again').onclick = start;
+  document.getElementById('back').onclick = intro;
+}
+
+fetch('derived/drills_5.json')
+  .then(r => { if(!r.ok) throw new Error('derived/drills_5.json — ' + r.status);
+               return r.json(); })
+  .then(d => { BANK = d; intro(); })
+  .catch(e => {
+    document.getElementById('app').innerHTML =
+      `<div class="panel err"><b>The drills did not load.</b><br>${e.message}<br><br>
+       This page needs <code>derived/drills_5.json</code> beside it, and must be
+       served over http — opening the file directly will not work. Run
+       <code>python3 -m http.server</code> in this folder and visit
+       <code>http://localhost:8000/tutor.html</code>.</div>`;
+  });
+</script>
+</body>
+</html>
